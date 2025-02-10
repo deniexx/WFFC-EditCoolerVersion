@@ -19,40 +19,11 @@ Game::Game()
     m_deviceResources = std::make_unique<DX::DeviceResources>();
     m_deviceResources->RegisterDeviceNotify(this);
 	m_displayList.clear();
+    m_camera = std::make_unique<Camera>();
 	
 	//initial Settings
 	//modes
 	m_grid = false;
-
-	//functional
-	m_movespeed = 0.30;
-	m_camRotRate = 3.0;
-
-	//camera
-	m_camPosition.x = 0.0f;
-	m_camPosition.y = 3.7f;
-	m_camPosition.z = -3.5f;
-
-	m_camOrientation.x = 0;
-	m_camOrientation.y = 0;
-	m_camOrientation.z = 0;
-
-	m_camLookAt.x = 0.0f;
-	m_camLookAt.y = 0.0f;
-	m_camLookAt.z = 0.0f;
-
-	m_camLookDirection.x = 0.0f;
-	m_camLookDirection.y = 0.0f;
-	m_camLookDirection.z = 0.0f;
-
-	m_camRight.x = 0.0f;
-	m_camRight.y = 0.0f;
-	m_camRight.z = 0.0f;
-
-	m_camOrientation.x = 0.0f;
-	m_camOrientation.y = 0.0f;
-	m_camOrientation.z = 0.0f;
-
 }
 
 Game::~Game()
@@ -142,54 +113,63 @@ void Game::Update(DX::StepTimer const& timer)
 {
 	//TODO  any more complex than this, and the camera should be abstracted out to somewhere else
 	//camera motion is on a plane, so kill the 7 component of the look direction
-	Vector3 planarMotionVector = m_camLookDirection;
-	planarMotionVector.y = 0.0;
+    Mouse::State mouseState = m_mouse->GetState();
+    if (mouseState.rightButton)
+    {
+        Vector3 mouseDelta = Vector3(mouseState.x, mouseState.y, 0.f) - m_lastMouse;
+        m_camera->AddMouseInput(mouseDelta);
+    }
+    else
+    {
+        if (m_InputCommands.rotRight)
+        {
+            m_camera->AddPitchInput(1.f);
+        }
+        if (m_InputCommands.rotLeft)
+        {
+            m_camera->AddPitchInput(-1.f);
+        }
+        if (m_InputCommands.lookUp)
+        {
+            m_camera->AddYawInput(1.f);
+        }
+        if (m_InputCommands.lookDown)
+        {
+            m_camera->AddYawInput(-1.f);
+        }
+    }
+    if (m_InputCommands.forward)
+    {
+        m_camera->AddMovementInput(Vector3(1.f, 0.f, 0.f));
+    }
+    if (m_InputCommands.back)
+    {
+        m_camera->AddMovementInput(Vector3(-1.f, 0.f, 0.f));
+    }
+    if (m_InputCommands.right)
+    {
+        m_camera->AddMovementInput(Vector3(0.f, 0.f, 1.f));
+    }
+    if (m_InputCommands.left)
+    {
+        m_camera->AddMovementInput(Vector3(0.f, 0.f, -1.f));
+    }
+    if (m_InputCommands.up)
+    {
+        m_camera->AddMovementInput(Vector3(0.f, 1.f, 0.f));
+    }
+    if (m_InputCommands.down)
+    {
+        m_camera->AddMovementInput(Vector3(0.f, -1.f, 0.f));
+    }
 
-	if (m_InputCommands.rotRight)
-	{
-		m_camOrientation.y -= m_camRotRate;
-	}
-	if (m_InputCommands.rotLeft)
-	{
-		m_camOrientation.y += m_camRotRate;
-	}
-
-	//create look direction from Euler angles in m_camOrientation
-	m_camLookDirection.x = sin((m_camOrientation.y)*3.1415 / 180);
-	m_camLookDirection.z = cos((m_camOrientation.y)*3.1415 / 180);
-	m_camLookDirection.Normalize();
-
-	//create right vector from look Direction
-	m_camLookDirection.Cross(Vector3::UnitY, m_camRight);
-
-	//process input and update stuff
-	if (m_InputCommands.forward)
-	{	
-		m_camPosition += m_camLookDirection*m_movespeed;
-	}
-	if (m_InputCommands.back)
-	{
-		m_camPosition -= m_camLookDirection*m_movespeed;
-	}
-	if (m_InputCommands.right)
-	{
-		m_camPosition += m_camRight*m_movespeed;
-	}
-	if (m_InputCommands.left)
-	{
-		m_camPosition -= m_camRight*m_movespeed;
-	}
-
-	//update lookat point
-	m_camLookAt = m_camPosition + m_camLookDirection;
-
-	//apply camera vectors
-    m_view = Matrix::CreateLookAt(m_camPosition, m_camLookAt, Vector3::UnitY);
-
-    m_batchEffect->SetView(m_view);
+    m_camera->Update();
+    m_batchEffect->SetView(m_camera->GetViewMatrix());
     m_batchEffect->SetWorld(Matrix::Identity);
-	m_displayChunk.m_terrainEffect->SetView(m_view);
+	m_displayChunk.m_terrainEffect->SetView(m_camera->GetViewMatrix());
 	m_displayChunk.m_terrainEffect->SetWorld(Matrix::Identity);
+
+    m_lastMouse = Vector3(mouseState.x, mouseState.y, 0.f);
 
 #ifdef DXTK_AUDIO
     m_audioTimerAcc -= (float)timer.GetElapsedSeconds();
@@ -245,7 +225,7 @@ void Game::Render()
 	//CAMERA POSITION ON HUD
 	m_sprites->Begin();
 	WCHAR   Buffer[256];
-	std::wstring var = L"Cam X: " + std::to_wstring(m_camPosition.x) + L"Cam Z: " + std::to_wstring(m_camPosition.z);
+	std::wstring var = L"Cam X: " + std::to_wstring(m_camera->GetCameraPosition().x) + L"Cam Z: " + std::to_wstring(m_camera->GetCameraPosition().z);
 	m_font->DrawString(m_sprites.get(), var.c_str() , XMFLOAT2(100, 10), Colors::Yellow);
 	m_sprites->End();
 
@@ -264,7 +244,7 @@ void Game::Render()
 
 		XMMATRIX local = m_world * XMMatrixTransformation(g_XMZero, Quaternion::Identity, scale, g_XMZero, rotate, translate);
 
-		m_displayList[i].m_model->Draw(context, *m_states, local, m_view, m_projection, false);	//last variable in draw,  make TRUE for wireframe
+		m_displayList[i].m_model->Draw(context, *m_states, local, m_camera->GetViewMatrix(), m_projection, false);	//last variable in draw,  make TRUE for wireframe
 
 		m_deviceResources->PIXEndEvent();
 	}

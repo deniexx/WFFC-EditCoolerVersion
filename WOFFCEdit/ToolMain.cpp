@@ -304,12 +304,21 @@ void ToolMain::UpdateInput(MSG * msg)
 	case WM_KEYUP:
 		m_keyArray[msg->wParam] = false;
 		break;
-
+	case WM_ACTIVATE:
+	case WM_ACTIVATEAPP:
+	case WM_INPUT:
 	case WM_MOUSEMOVE:
-		break;
-
-	case WM_LBUTTONDOWN:	//mouse button down,  you will probably need to check when its up too
-		//set some flag for the mouse button in inputcommands
+	case WM_LBUTTONDOWN:
+	case WM_LBUTTONUP:
+	case WM_RBUTTONDOWN:
+	case WM_RBUTTONUP:
+	case WM_MBUTTONDOWN:
+	case WM_MBUTTONUP:
+	case WM_MOUSEWHEEL:
+	case WM_XBUTTONDOWN:
+	case WM_XBUTTONUP:
+	case WM_MOUSEHOVER:
+		DirectX::Mouse::ProcessMessage(msg->message, msg->wParam, msg->lParam);
 		break;
 
 	}
@@ -338,16 +347,36 @@ void ToolMain::UpdateInput(MSG * msg)
 	}
 	else m_toolInputCommands.right = false;
 	//rotation
-	if (m_keyArray['E'])
+	if (m_keyArray['X'])
 	{
 		m_toolInputCommands.rotRight = true;
 	}
 	else m_toolInputCommands.rotRight = false;
-	if (m_keyArray['Q'])
+	if (m_keyArray['Z'])
 	{
 		m_toolInputCommands.rotLeft = true;
 	}
 	else m_toolInputCommands.rotLeft = false;
+	if (m_keyArray['Q'])
+	{
+		m_toolInputCommands.down = true;
+	}
+	else m_toolInputCommands.down = false;
+	if (m_keyArray['E'])
+	{
+		m_toolInputCommands.up = true;
+	}
+	else m_toolInputCommands.up = false;
+	if (m_keyArray['R'])
+	{
+		m_toolInputCommands.lookUp = true;
+	}
+	else m_toolInputCommands.lookUp = false;
+	if (m_keyArray['F'])
+	{
+		m_toolInputCommands.lookDown = true;
+	}
+	else m_toolInputCommands.lookDown = false;
 
 	//WASD
 }
