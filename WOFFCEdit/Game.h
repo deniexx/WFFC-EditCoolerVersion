@@ -90,6 +90,8 @@ private:
 
 	std::vector<int> m_pickedObjects;
 	Vector3 m_lastMouse;
+	HWND m_hwnd;
+	HCURSOR m_cursor;
 
     // DirectXTK objects.
     std::unique_ptr<DirectX::CommonStates>                                  m_states;
@@ -114,6 +116,7 @@ private:
     Microsoft::WRL::ComPtr<ID3D11InputLayout>                               m_batchInputLayout;
 	
 	bool m_lmbDownLastFrame = false;
+	bool m_rmbDownLastFrame = false;
 
 #ifdef DXTK_AUDIO
     uint32_t                                                                m_audioEvent;

@@ -24,6 +24,7 @@ Game::Game()
 	//initial Settings
 	//modes
     m_lmbDownLastFrame = false;
+    m_rmbDownLastFrame = false;
 	m_grid = false;
 }
 
@@ -49,6 +50,9 @@ void Game::Initialize(HWND window, int width, int height)
     m_mouse->SetWindow(window);
 
     m_deviceResources->SetWindow(window, width, height);
+
+    m_hwnd = window;
+    m_cursor = LoadCursor(NULL, IDC_ARROW);
 
     m_deviceResources->CreateDeviceResources();
     CreateDeviceDependentResources();
@@ -115,13 +119,39 @@ void Game::Update(DX::StepTimer const& timer)
 	//TODO  any more complex than this, and the camera should be abstracted out to somewhere else
 	//camera motion is on a plane, so kill the 7 component of the look direction
     Mouse::State mouseState = m_mouse->GetState();
+
     if (mouseState.rightButton)
     {
-        Vector3 mouseDelta = Vector3(mouseState.x, mouseState.y, 0.f) - m_lastMouse;
+        RECT rect;
+        GetWindowRect(m_hwnd, &rect);
+        float middleX = (rect.right - rect.left) / 2.f + rect.left;
+        float middleY = (rect.bottom - rect.top) / 2.f + rect.top;
+
+        if (!m_rmbDownLastFrame)
+        {
+            SetCursor(NULL);
+            SetCursorPos(middleX, middleY);
+        }
+
+        POINT point;
+        GetCursorPos(&point);
+        Vector3 mouseDelta = Vector3::Zero;
+        if (m_rmbDownLastFrame)
+        {
+            float diffX = point.x - middleX;
+            float diffY = point.y - middleY;
+            mouseDelta = Vector3(diffX, diffY, 0.f);
+        }
+        SetCursorPos(middleX, middleY);
         m_camera->AddMouseInput(mouseDelta);
     }
     else
     {
+        if (m_rmbDownLastFrame)
+        {
+            SetCursor(m_cursor);
+        }
+
         if (m_InputCommands.rotRight)
         {
             m_camera->AddPitchInput(1.f);
@@ -206,7 +236,9 @@ void Game::Update(DX::StepTimer const& timer)
 	m_displayChunk.m_terrainEffect->SetView(m_camera->GetViewMatrix());
 	m_displayChunk.m_terrainEffect->SetWorld(Matrix::Identity);
 
+    m_rmbDownLastFrame = mouseState.rightButton;
     m_lmbDownLastFrame = mouseState.leftButton;
+
     m_lastMouse = Vector3(mouseState.x, mouseState.y, 0.f);
 
 #ifdef DXTK_AUDIO
