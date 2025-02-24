@@ -1,25 +1,25 @@
 ﻿  Game.cpp
-C:\GameDev\WFFC-EditCoolerVersion\WOFFCEdit\Game.cpp(133,35): warning C4244: 'argument': conversion from 'float' to 'int', possible loss of data
-C:\GameDev\WFFC-EditCoolerVersion\WOFFCEdit\Game.cpp(133,26): warning C4244: 'argument': conversion from 'float' to 'int', possible loss of data
-C:\GameDev\WFFC-EditCoolerVersion\WOFFCEdit\Game.cpp(145,31): warning C4244: 'argument': conversion from 'float' to 'int', possible loss of data
-C:\GameDev\WFFC-EditCoolerVersion\WOFFCEdit\Game.cpp(145,22): warning C4244: 'argument': conversion from 'float' to 'int', possible loss of data
-C:\GameDev\WFFC-EditCoolerVersion\WOFFCEdit\Game.cpp(242,51): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
-C:\GameDev\WFFC-EditCoolerVersion\WOFFCEdit\Game.cpp(242,37): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
-C:\GameDev\WFFC-EditCoolerVersion\WOFFCEdit\Game.cpp(313,57): warning C4244: 'argument': conversion from 'double' to 'float', possible loss of data
-C:\GameDev\WFFC-EditCoolerVersion\WOFFCEdit\Game.cpp(312,57): warning C4244: 'argument': conversion from 'double' to 'float', possible loss of data
-C:\GameDev\WFFC-EditCoolerVersion\WOFFCEdit\Game.cpp(311,97): warning C4244: 'argument': conversion from 'double' to 'float', possible loss of data
-C:\GameDev\WFFC-EditCoolerVersion\WOFFCEdit\Game.cpp(297,10): warning C4101: 'Buffer': unreferenced local variable
-C:\GameDev\WFFC-EditCoolerVersion\WOFFCEdit\Game.cpp(641,59): warning C4244: 'argument': conversion from 'const int' to 'float', possible loss of data
-C:\GameDev\WFFC-EditCoolerVersion\WOFFCEdit\Game.cpp(641,50): warning C4244: 'argument': conversion from 'const int' to 'float', possible loss of data
-C:\GameDev\WFFC-EditCoolerVersion\WOFFCEdit\Game.cpp(642,58): warning C4244: 'argument': conversion from 'const int' to 'float', possible loss of data
-C:\GameDev\WFFC-EditCoolerVersion\WOFFCEdit\Game.cpp(642,49): warning C4244: 'argument': conversion from 'const int' to 'float', possible loss of data
-C:\GameDev\WFFC-EditCoolerVersion\WOFFCEdit\Game.cpp(644,23): warning C4018: '<': signed/unsigned mismatch
-C:\GameDev\WFFC-EditCoolerVersion\WOFFCEdit\Game.cpp(662,55): warning C4244: 'argument': conversion from 'double' to 'float', possible loss of data
-C:\GameDev\WFFC-EditCoolerVersion\WOFFCEdit\Game.cpp(661,55): warning C4244: 'argument': conversion from 'double' to 'float', possible loss of data
-C:\GameDev\WFFC-EditCoolerVersion\WOFFCEdit\Game.cpp(660,55): warning C4244: 'argument': conversion from 'double' to 'float', possible loss of data
-C:\GameDev\WFFC-EditCoolerVersion\WOFFCEdit\Game.cpp(671,73): warning C4244: 'argument': conversion from 'const LONG' to 'float', possible loss of data
-C:\GameDev\WFFC-EditCoolerVersion\WOFFCEdit\Game.cpp(671,50): warning C4244: 'argument': conversion from 'const LONG' to 'float', possible loss of data
-C:\GameDev\WFFC-EditCoolerVersion\WOFFCEdit\Game.cpp(678,72): warning C4244: 'argument': conversion from 'const LONG' to 'float', possible loss of data
-C:\GameDev\WFFC-EditCoolerVersion\WOFFCEdit\Game.cpp(678,49): warning C4244: 'argument': conversion from 'const LONG' to 'float', possible loss of data
-C:\GameDev\WFFC-EditCoolerVersion\WOFFCEdit\Game.cpp(686,27): warning C4018: '<': signed/unsigned mismatch
+C:\GameDev\WFFC-EditCoolerVersion\WOFFCEdit\Game.cpp(135,35): warning C4244: 'argument': conversion from 'float' to 'int', possible loss of data
+C:\GameDev\WFFC-EditCoolerVersion\WOFFCEdit\Game.cpp(135,26): warning C4244: 'argument': conversion from 'float' to 'int', possible loss of data
+C:\GameDev\WFFC-EditCoolerVersion\WOFFCEdit\Game.cpp(147,31): warning C4244: 'argument': conversion from 'float' to 'int', possible loss of data
+C:\GameDev\WFFC-EditCoolerVersion\WOFFCEdit\Game.cpp(147,22): warning C4244: 'argument': conversion from 'float' to 'int', possible loss of data
+C:\GameDev\WFFC-EditCoolerVersion\WOFFCEdit\Game.cpp(244,51): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
+C:\GameDev\WFFC-EditCoolerVersion\WOFFCEdit\Game.cpp(244,37): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
+C:\GameDev\WFFC-EditCoolerVersion\WOFFCEdit\Game.cpp(309,57): warning C4244: 'argument': conversion from 'double' to 'float', possible loss of data
+C:\GameDev\WFFC-EditCoolerVersion\WOFFCEdit\Game.cpp(308,57): warning C4244: 'argument': conversion from 'double' to 'float', possible loss of data
+C:\GameDev\WFFC-EditCoolerVersion\WOFFCEdit\Game.cpp(307,97): warning C4244: 'argument': conversion from 'double' to 'float', possible loss of data
+C:\GameDev\WFFC-EditCoolerVersion\WOFFCEdit\Game.cpp(331,13): warning C4101: 'Buffer': unreferenced local variable
+C:\GameDev\WFFC-EditCoolerVersion\WOFFCEdit\Game.cpp(654,59): warning C4244: 'argument': conversion from 'const int' to 'float', possible loss of data
+C:\GameDev\WFFC-EditCoolerVersion\WOFFCEdit\Game.cpp(654,50): warning C4244: 'argument': conversion from 'const int' to 'float', possible loss of data
+C:\GameDev\WFFC-EditCoolerVersion\WOFFCEdit\Game.cpp(655,58): warning C4244: 'argument': conversion from 'const int' to 'float', possible loss of data
+C:\GameDev\WFFC-EditCoolerVersion\WOFFCEdit\Game.cpp(655,49): warning C4244: 'argument': conversion from 'const int' to 'float', possible loss of data
+C:\GameDev\WFFC-EditCoolerVersion\WOFFCEdit\Game.cpp(657,23): warning C4018: '<': signed/unsigned mismatch
+C:\GameDev\WFFC-EditCoolerVersion\WOFFCEdit\Game.cpp(675,55): warning C4244: 'argument': conversion from 'double' to 'float', possible loss of data
+C:\GameDev\WFFC-EditCoolerVersion\WOFFCEdit\Game.cpp(674,55): warning C4244: 'argument': conversion from 'double' to 'float', possible loss of data
+C:\GameDev\WFFC-EditCoolerVersion\WOFFCEdit\Game.cpp(673,55): warning C4244: 'argument': conversion from 'double' to 'float', possible loss of data
+C:\GameDev\WFFC-EditCoolerVersion\WOFFCEdit\Game.cpp(684,73): warning C4244: 'argument': conversion from 'const LONG' to 'float', possible loss of data
+C:\GameDev\WFFC-EditCoolerVersion\WOFFCEdit\Game.cpp(684,50): warning C4244: 'argument': conversion from 'const LONG' to 'float', possible loss of data
+C:\GameDev\WFFC-EditCoolerVersion\WOFFCEdit\Game.cpp(691,72): warning C4244: 'argument': conversion from 'const LONG' to 'float', possible loss of data
+C:\GameDev\WFFC-EditCoolerVersion\WOFFCEdit\Game.cpp(691,49): warning C4244: 'argument': conversion from 'const LONG' to 'float', possible loss of data
+C:\GameDev\WFFC-EditCoolerVersion\WOFFCEdit\Game.cpp(699,27): warning C4018: '<': signed/unsigned mismatch
   Win32SimpleSample.vcxproj -> C:\GameDev\WFFC-EditCoolerVersion\WOFFCEdit\Debug\WoFEdit.exe
