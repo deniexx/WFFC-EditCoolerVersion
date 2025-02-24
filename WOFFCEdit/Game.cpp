@@ -23,6 +23,7 @@ Game::Game()
 	
 	//initial Settings
 	//modes
+    m_lmbDownLastFrame = false;
 	m_grid = false;
 }
 
@@ -163,12 +164,49 @@ void Game::Update(DX::StepTimer const& timer)
         m_camera->AddMovementInput(Vector3(0.f, -1.f, 0.f));
     }
 
+    bool wasLMBReleased = m_lmbDownLastFrame == true && mouseState.leftButton == false;
+    if (wasLMBReleased)
+    {
+        int selected = PickObjectUnderMouse();
+        if (m_InputCommands.shiftDown)
+        {
+            // Unselect object if it is already in the array
+            if (std::find(m_pickedObjects.begin(), m_pickedObjects.end(), selected) != m_pickedObjects.end())
+            {
+                m_pickedObjects.erase(std::remove(m_pickedObjects.begin(), m_pickedObjects.end(), selected), m_pickedObjects.end());
+            }
+            else
+            {
+                m_pickedObjects.push_back(selected);
+            }
+        }
+        else
+        {
+            if (m_pickedObjects.size() > 1)
+            {
+                m_pickedObjects.clear();
+            }
+
+            if (std::find(m_pickedObjects.begin(), m_pickedObjects.end(), selected) != m_pickedObjects.end())
+            {
+                m_pickedObjects.clear();
+            }
+            else
+            {
+                m_pickedObjects.clear();
+                m_pickedObjects.push_back(selected);
+            }
+
+        }
+    }
+
     m_camera->Update();
     m_batchEffect->SetView(m_camera->GetViewMatrix());
     m_batchEffect->SetWorld(Matrix::Identity);
 	m_displayChunk.m_terrainEffect->SetView(m_camera->GetViewMatrix());
 	m_displayChunk.m_terrainEffect->SetWorld(Matrix::Identity);
 
+    m_lmbDownLastFrame = mouseState.leftButton;
     m_lastMouse = Vector3(mouseState.x, mouseState.y, 0.f);
 
 #ifdef DXTK_AUDIO
@@ -462,6 +500,11 @@ void Game::SaveDisplayChunk(ChunkObject * SceneChunk)
 	m_displayChunk.SaveHeightMap();			//save heightmap to file.
 }
 
+const std::vector<int>& Game::GetPickedObjects()
+{
+    return m_pickedObjects;
+}
+
 #ifdef DXTK_AUDIO
 void Game::NewAudioDevice()
 {
@@ -554,6 +597,75 @@ void Game::CreateWindowSizeDependentResources()
 
     m_batchEffect->SetProjection(m_projection);
 	
+}
+
+int Game::PickObjectUnderMouse()
+{
+    int selectedID = -1;
+    float pickedDistance = 9999999.f;
+
+    const RECT sreenDimensions = m_deviceResources->GetOutputSize();
+    const DirectX::Mouse::State state = m_mouse->GetState();
+    const XMVECTOR nearSource = XMVectorSet(state.x, state.y, 0.f, 1.f);
+    const XMVECTOR farSource = XMVectorSet(state.x, state.y, 1.f, 0.f);
+
+    for (int i = 0; i < m_displayList.size(); ++i)
+    {
+        const XMVECTORF32 scale = 
+        { 
+            m_displayList[i].m_scale.x,
+            m_displayList[i].m_scale.y, 
+            m_displayList[i].m_scale.z 
+        };
+        const XMVECTORF32 translation =
+        {
+            m_displayList[i].m_position.x,
+            m_displayList[i].m_position.y,
+            m_displayList[i].m_position.z
+        };
+
+        const XMVECTOR rotation = Quaternion::CreateFromYawPitchRoll(
+            m_displayList[i].m_orientation.y * 3.1415 / 180,
+            m_displayList[i].m_orientation.x * 3.1415 / 180,
+            m_displayList[i].m_orientation.z * 3.1415 / 180
+        );
+
+        const XMMATRIX worldSpace = m_world * XMMatrixTransformation(
+            g_XMZero, Quaternion::Identity, scale, g_XMZero,
+            rotation, translation
+        );
+ 
+        const XMVECTOR nearPoint = XMVector3Unproject(
+            nearSource, 0.f, 0.f, sreenDimensions.right, sreenDimensions.bottom,
+            m_deviceResources->GetScreenViewport().MinDepth,
+            m_deviceResources->GetScreenViewport().MaxDepth,
+            m_projection, m_camera->GetViewMatrix(), worldSpace
+        );
+
+        const XMVECTOR farPoint = XMVector3Unproject(
+            farSource, 0.f, 0.f, sreenDimensions.right, sreenDimensions.bottom,
+            m_deviceResources->GetScreenViewport().MinDepth,
+            m_deviceResources->GetScreenViewport().MaxDepth,
+            m_projection, m_camera->GetViewMatrix(), worldSpace
+        );
+
+        const XMVECTOR pickingVector = XMVector3Normalize(farPoint - nearPoint);
+        
+        for (int y = 0; y < m_displayList[i].m_model.get()->meshes.size(); ++y)
+        {
+            float currentPickedDistance = 999999.f;
+            if (m_displayList[i].m_model.get()->meshes[y]->boundingBox.Intersects(
+                nearPoint, pickingVector, currentPickedDistance))
+            {
+                if (currentPickedDistance < pickedDistance)
+                {
+                    selectedID = i;
+                }
+            }
+        }
+    }
+
+    return selectedID;
 }
 
 void Game::OnDeviceLost()

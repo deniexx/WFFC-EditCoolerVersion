@@ -9,7 +9,6 @@ ToolMain::ToolMain()
 {
 
 	m_currentChunk = 0;		//default value
-	m_selectedObject = 0;	//initial selection ID
 	m_sceneGraph.clear();	//clear the vector for the scenegraph
 	m_databaseConnection = NULL;
 
@@ -17,8 +16,7 @@ ToolMain::ToolMain()
 	m_toolInputCommands.forward		= false;
 	m_toolInputCommands.back		= false;
 	m_toolInputCommands.left		= false;
-	m_toolInputCommands.right		= false;
-	
+	m_toolInputCommands.right		= false;	
 }
 
 
@@ -28,10 +26,9 @@ ToolMain::~ToolMain()
 }
 
 
-int ToolMain::getCurrentSelectionID()
+const std::vector<int>& ToolMain::getCurrentSelectionIDs()
 {
-
-	return m_selectedObject;
+	return m_d3dRenderer.GetPickedObjects();
 }
 
 void ToolMain::onActionInitialise(HWND handle, int width, int height)
@@ -57,6 +54,7 @@ void ToolMain::onActionInitialise(HWND handle, int width, int height)
 	}
 
 	onActionLoad();
+	SetCapture(handle);
 }
 
 void ToolMain::onActionLoad()
@@ -377,6 +375,9 @@ void ToolMain::UpdateInput(MSG * msg)
 		m_toolInputCommands.lookDown = true;
 	}
 	else m_toolInputCommands.lookDown = false;
-
-	//WASD
+	if (m_keyArray[VK_SHIFT])
+	{
+		m_toolInputCommands.shiftDown = true;
+	}
+	else m_toolInputCommands.shiftDown = false;	
 }

@@ -52,6 +52,8 @@ public:
 	void SaveDisplayChunk(ChunkObject *SceneChunk);	//saves geometry et al
 	void ClearDisplayList();
 
+	const std::vector<int>& GetPickedObjects();
+
 #ifdef DXTK_AUDIO
 	void NewAudioDevice();
 #endif
@@ -62,6 +64,8 @@ private:
 
 	void CreateDeviceDependentResources();
 	void CreateWindowSizeDependentResources();
+
+	int PickObjectUnderMouse();
 
 	void XM_CALLCONV DrawGrid(DirectX::FXMVECTOR xAxis, DirectX::FXMVECTOR yAxis, DirectX::FXMVECTOR origin, size_t xdivs, size_t ydivs, DirectX::GXMVECTOR color);
 
@@ -84,6 +88,7 @@ private:
     std::unique_ptr<DirectX::Mouse>         m_mouse;
 	std::unique_ptr<Camera>					m_camera;
 
+	std::vector<int> m_pickedObjects;
 	Vector3 m_lastMouse;
 
     // DirectXTK objects.
@@ -107,6 +112,8 @@ private:
     Microsoft::WRL::ComPtr<ID3D11ShaderResourceView>                        m_texture1;
     Microsoft::WRL::ComPtr<ID3D11ShaderResourceView>                        m_texture2;
     Microsoft::WRL::ComPtr<ID3D11InputLayout>                               m_batchInputLayout;
+	
+	bool m_lmbDownLastFrame = false;
 
 #ifdef DXTK_AUDIO
     uint32_t                                                                m_audioEvent;
