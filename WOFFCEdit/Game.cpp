@@ -795,11 +795,15 @@ void Game::DrawImGui()
 
 void Game::DrawHierarchy()
 {
+    ImVec2 contentRegion = ImGui::GetContentRegionAvail();
+    contentRegion.y /= 1.5f;
+    ImGui::BeginChild("Hierarchy", contentRegion);
     if (ImGui::CollapsingHeader("Hierarchy")) 
     {
-        ImGui::SetWindowFontScale(1.5f);
+        ImGui::SetWindowFontScale(1.2f);
         ImVec2 buttonSize = ImGui::GetContentRegionAvail();
-        buttonSize.y = 24.f;
+        buttonSize.x -= 12.f;
+        buttonSize.y = 18.f;
         ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.f, 0.f, 0.f, 1.f));
         for (int i = 0; i < m_displayList.size(); ++i)
         {
@@ -819,9 +823,11 @@ void Game::DrawHierarchy()
         ImGui::SetWindowFontScale(1.f);
         ImGui::PopStyleColor();
     }
+    ImGui::EndChild();
+
 
     ImGui::BeginChild("Transform");
-    if (ImGui::CollapsingHeader("Transform"))
+    if (ImGui::CollapsingHeader("Transform"), ImGuiTreeNodeFlags_Framed)
     {
         if (m_pickedObjects.size() == 0)
         {
@@ -833,19 +839,32 @@ void Game::DrawHierarchy()
         }
         else
         {
-            ImGui::SeparatorText("Translation:");
             int index = m_pickedObjects[m_pickedObjects.size() - 1];
+
+            ImGui::SeparatorText("Translation:");
             ImGui::PushID("Translation");
-            ImGui::InputFloat3("XYZ:", &m_displayList[index].m_position.x);
+            ImGui::PushItemWidth(ImGui::CalcItemWidth() / 2.1);
+            ImGui::DragFloat("##X", &m_displayList[index].m_position.x, 1.f, 0.f, 0.f, "X: %.2f");
+            ImGui::SameLine(); ImGui::DragFloat("##Y", &m_displayList[index].m_position.y, 1.f, 0.f, 0.f, "Y: %.2f");
+            ImGui::SameLine(); ImGui::DragFloat("##Z", &m_displayList[index].m_position.z, 1.f, 0.f, 0.f, "Z: %.2f");
+            ImGui::PopItemWidth();
             ImGui::PopID();
 
             ImGui::SeparatorText("Rotation:");
             ImGui::PushID("Rotation");
-            ImGui::InputFloat3("XYZ:", &m_displayList[index].m_orientation.x);
+            ImGui::PushItemWidth(ImGui::CalcItemWidth() / 2.1);
+            ImGui::DragFloat("##X", &m_displayList[index].m_orientation.x, 1.f, 0.f, 0.f, "X: %.2f");
+            ImGui::SameLine(); ImGui::DragFloat("##Y", &m_displayList[index].m_orientation.y, 1.f, 0.f, 0.f, "Y: %.2f");
+            ImGui::SameLine(); ImGui::DragFloat("##Z", &m_displayList[index].m_orientation.z, 1.f, 0.f, 0.f, "Z: %.2f");
+            ImGui::PopItemWidth();
             ImGui::PopID();
 
             ImGui::SeparatorText("Scale:");
-            ImGui::InputFloat3("XYZ:", &m_displayList[index].m_scale.x);
+            ImGui::PushItemWidth(ImGui::CalcItemWidth() / 2.1);
+            ImGui::DragFloat("##X", &m_displayList[index].m_scale.x, 1.f, 0.f, 0.f, "X: %.2f");
+            ImGui::SameLine(); ImGui::DragFloat("##Y", &m_displayList[index].m_scale.y, 1.f, 0.f, 0.f, "Y: %.2f");
+            ImGui::SameLine(); ImGui::DragFloat("##Z", &m_displayList[index].m_scale.z, 1.f, 0.f, 0.f, "Z: %.2f");
+            ImGui::PopItemWidth();
         }
     }
 
