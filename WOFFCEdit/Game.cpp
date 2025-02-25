@@ -781,14 +781,17 @@ std::wstring StringToWCHART(std::string s)
 
 void Game::DrawImGui()
 {
-    if (!ImGui::Begin("Editor View"))
+    if (!ImGui::Begin("World Outliner"))
     {
         ImGui::End();
     }
+    else
+    {
+        DrawHierarchy();
+        ImGui::End();
+    }
 
-    DrawHierarchy();
 
-    ImGui::End();
     ImGui::Render();
     ImGui_ImplDX11_RenderDrawData(ImGui::GetDrawData());
 }
@@ -827,7 +830,7 @@ void Game::DrawHierarchy()
 
 
     ImGui::BeginChild("Transform");
-    if (ImGui::CollapsingHeader("Transform"), ImGuiTreeNodeFlags_Framed)
+    if (ImGui::CollapsingHeader("Transform"))
     {
         if (m_pickedObjects.size() == 0)
         {
@@ -844,7 +847,7 @@ void Game::DrawHierarchy()
             ImGui::SeparatorText("Translation:");
             ImGui::PushID("Translation");
             ImGui::PushItemWidth(ImGui::CalcItemWidth() / 2.1);
-            ImGui::DragFloat("##X", &m_displayList[index].m_position.x, 1.f, 0.f, 0.f, "X: %.2f");
+            ImGui::DragFloat("##X", &m_displayList[index].m_position.x, m_transformDragStep, 0.f, 0.f, "X: %.2f");
             ImGui::SameLine(); ImGui::DragFloat("##Y", &m_displayList[index].m_position.y, 1.f, 0.f, 0.f, "Y: %.2f");
             ImGui::SameLine(); ImGui::DragFloat("##Z", &m_displayList[index].m_position.z, 1.f, 0.f, 0.f, "Z: %.2f");
             ImGui::PopItemWidth();
@@ -853,7 +856,7 @@ void Game::DrawHierarchy()
             ImGui::SeparatorText("Rotation:");
             ImGui::PushID("Rotation");
             ImGui::PushItemWidth(ImGui::CalcItemWidth() / 2.1);
-            ImGui::DragFloat("##X", &m_displayList[index].m_orientation.x, 1.f, 0.f, 0.f, "X: %.2f");
+            ImGui::DragFloat("##X", &m_displayList[index].m_orientation.x, m_transformDragStep, 0.f, 0.f, "X: %.2f");
             ImGui::SameLine(); ImGui::DragFloat("##Y", &m_displayList[index].m_orientation.y, 1.f, 0.f, 0.f, "Y: %.2f");
             ImGui::SameLine(); ImGui::DragFloat("##Z", &m_displayList[index].m_orientation.z, 1.f, 0.f, 0.f, "Z: %.2f");
             ImGui::PopItemWidth();
@@ -861,10 +864,13 @@ void Game::DrawHierarchy()
 
             ImGui::SeparatorText("Scale:");
             ImGui::PushItemWidth(ImGui::CalcItemWidth() / 2.1);
-            ImGui::DragFloat("##X", &m_displayList[index].m_scale.x, 1.f, 0.f, 0.f, "X: %.2f");
+            ImGui::DragFloat("##X", &m_displayList[index].m_scale.x, m_transformDragStep, 0.f, 0.f, "X: %.2f");
             ImGui::SameLine(); ImGui::DragFloat("##Y", &m_displayList[index].m_scale.y, 1.f, 0.f, 0.f, "Y: %.2f");
             ImGui::SameLine(); ImGui::DragFloat("##Z", &m_displayList[index].m_scale.z, 1.f, 0.f, 0.f, "Z: %.2f");
             ImGui::PopItemWidth();
+
+            ImGui::Text("Step: ");
+            ImGui::SameLine(); ImGui::DragInt("##S", &m_transformDragStep, 1.0, 1, 10);
         }
     }
 

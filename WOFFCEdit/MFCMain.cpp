@@ -101,8 +101,11 @@ void MFCMain::MenuEditSelect()
 	m_ToolSelectDialogue.Create(IDD_DIALOG1);	//Start up modeless
 	m_ToolSelectDialogue.ShowWindow(SW_SHOW);	//show modeless
 
-	int selection = m_ToolSystem.getCurrentSelectionIDs()[0];
-	m_ToolSelectDialogue.SetObjectData(&m_ToolSystem.m_sceneGraph, &selection);
+	if (m_ToolSystem.getCurrentSelectionIDs().size() > 0)
+	{
+		int selection = m_ToolSystem.getCurrentSelectionIDs()[0];
+		m_ToolSelectDialogue.SetObjectData(&m_ToolSystem.m_sceneGraph, &selection);
+	}
 }
 
 void MFCMain::ToolBarButton1()

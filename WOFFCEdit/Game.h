@@ -99,6 +99,8 @@ private:
 	HWND m_hwnd;
 	HCURSOR m_cursor;
 
+	int m_transformDragStep = 1;
+
     // DirectXTK objects.
     std::unique_ptr<DirectX::CommonStates>                                  m_states;
     std::unique_ptr<DirectX::BasicEffect>                                   m_batchEffect;
