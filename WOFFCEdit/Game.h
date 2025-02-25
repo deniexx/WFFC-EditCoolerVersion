@@ -35,6 +35,8 @@ public:
 	// Rendering helpers
 	void Clear();
 
+	std::shared_ptr<DX::DeviceResources> GetDeviceResources();
+
 	// IDeviceNotify
 	virtual void OnDeviceLost() override;
 	virtual void OnDeviceRestored() override;
@@ -66,6 +68,10 @@ private:
 	void CreateWindowSizeDependentResources();
 
 	int PickObjectUnderMouse();
+	void HandleObjectPicking(int selected);
+
+	void DrawImGui();
+	void DrawHierarchy();
 
 	void XM_CALLCONV DrawGrid(DirectX::FXMVECTOR xAxis, DirectX::FXMVECTOR yAxis, DirectX::FXMVECTOR origin, size_t xdivs, size_t ydivs, DirectX::GXMVECTOR color);
 

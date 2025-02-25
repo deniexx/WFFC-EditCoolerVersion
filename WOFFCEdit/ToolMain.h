@@ -6,6 +6,9 @@
 #include "sqlite3.h"
 #include "SceneObject.h"
 #include "InputCommands.h"
+#include "vendor/imgui/imgui.h"
+#include "vendor/imgui/backends/imgui_impl_win32.h"
+#include "vendor/imgui/backends/imgui_impl_dx11.h"
 #include <vector>
 
 

@@ -53,6 +53,17 @@ void ToolMain::onActionInitialise(HWND handle, int width, int height)
 		TRACE("Opened database successfully");
 	}
 
+	// Setup Dear ImGui context
+	IMGUI_CHECKVERSION();
+	ImGui::CreateContext();
+	ImGuiIO& io = ImGui::GetIO();
+	io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;     // Enable Keyboard Controls
+
+	// Setup Platform/Renderer backends
+	ImGui_ImplWin32_Init(handle);
+	std::shared_ptr<DX::DeviceResources> deviceResources = m_d3dRenderer.GetDeviceResources();
+	ImGui_ImplDX11_Init(deviceResources->GetD3DDevice(), deviceResources->GetD3DDeviceContext());
+
 	onActionLoad();
 	SetCapture(handle);
 }
@@ -291,6 +302,8 @@ void ToolMain::Tick(MSG *msg)
 
 void ToolMain::UpdateInput(MSG * msg)
 {
+	extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
+	ImGui_ImplWin32_WndProcHandler(m_toolHandle, msg->message, msg->wParam, msg->lParam);
 
 	switch (msg->message)
 	{
@@ -320,6 +333,7 @@ void ToolMain::UpdateInput(MSG * msg)
 		break;
 
 	}
+
 	//here we update all the actual app functionality that we want.  This information will either be used int toolmain, or sent down to the renderer (Camera movement etc
 	//WASD movement
 	if (m_keyArray['W'])

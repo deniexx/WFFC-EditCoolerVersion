@@ -2,16 +2,16 @@
 
 struct InputCommands
 {
-	bool forward;
-	bool back;
-	bool right;
-	bool left;
-	bool up;
-	bool down;
-	bool rotRight;
-	bool rotLeft;
-	bool lookUp;
-	bool lookDown;
+	bool forward = false;
+	bool back = false;
+	bool right = false;
+	bool left = false;
+	bool up = false;
+	bool down = false;
+	bool rotRight = false;
+	bool rotLeft = false;
+	bool lookUp = false;
+	bool lookDown = false;
 
-	bool shiftDown;
+	bool shiftDown = false;
 };

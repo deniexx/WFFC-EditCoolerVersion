@@ -19,7 +19,7 @@ BOOL MFCMain::InitInstance()
 	m_frame->Create(	NULL,
 					_T("World Of Flim-Flam Craft Editor"),
 					WS_OVERLAPPEDWINDOW,
-					CRect(100, 100, 1024, 768),
+					CRect(100, 100, 1920, 1080),
 					NULL,
 					NULL,
 					0,
@@ -70,11 +70,11 @@ int MFCMain::Run()
 		else
 		{	
 			int size = m_ToolSystem.getCurrentSelectionIDs().size();
-			std::wstring statusString = L"Selected Object: " + std::to_wstring(size);
+			std::wstring statusString = L"Selected Objects: " + std::to_wstring(size);
 			m_ToolSystem.Tick(&msg);
 
 			//send current object ID to status bar in The main frame
-			m_frame->m_wndStatusBar.SetPaneText(1, statusString.c_str(), 1);	
+			m_frame->m_wndStatusBar.SetPaneText(1, statusString.c_str(), 1);
 		}
 	}
 

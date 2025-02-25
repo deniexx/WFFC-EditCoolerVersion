@@ -60,6 +60,14 @@
       <Filter>MFC</Filter>
     </ClCompile>
     <ClCompile Include="Camera.cpp" />
+    <ClCompile Include="vendor\imgui\imgui.cpp" />
+    <ClCompile Include="vendor\imgui\imgui_demo.cpp" />
+    <ClCompile Include="vendor\imgui\imgui_draw.cpp" />
+    <ClCompile Include="vendor\imgui\imgui_tables.cpp" />
+    <ClCompile Include="vendor\imgui\imgui_widgets.cpp" />
+    <ClCompile Include="vendor\imgui\backends\imgui_impl_dx11.cpp" />
+    <ClCompile Include="vendor\imgui\misc\cpp\imgui_stdlib.cpp" />
+    <ClCompile Include="vendor\imgui\backends\imgui_impl_win32.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="DeviceResources.h">
@@ -110,9 +118,19 @@
       <Filter>MFC</Filter>
     </ClInclude>
     <ClInclude Include="Camera.h" />
+    <ClInclude Include="vendor\imgui\imconfig.h" />
+    <ClInclude Include="vendor\imgui\imgui.h" />
+    <ClInclude Include="vendor\imgui\imgui_internal.h" />
+    <ClInclude Include="vendor\imgui\imstb_rectpack.h" />
+    <ClInclude Include="vendor\imgui\imstb_textedit.h" />
+    <ClInclude Include="vendor\imgui\imstb_truetype.h" />
+    <ClInclude Include="vendor\imgui\backends\imgui_impl_dx11.h" />
+    <ClInclude Include="vendor\imgui\misc\cpp\imgui_stdlib.h" />
+    <ClInclude Include="vendor\imgui\backends\imgui_impl_win32.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
+    <None Include="vendor\imgui\misc\debuggers\imgui.natstepfilter" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="Win32SimpleSample.rc">
@@ -126,5 +144,8 @@
   </ItemGroup>
   <ItemGroup>
     <Media Include="database\data\Scene1.fbx" />
+  </ItemGroup>
+  <ItemGroup>
+    <Natvis Include="vendor\imgui\misc\debuggers\imgui.natvis" />
   </ItemGroup>
 </Project>

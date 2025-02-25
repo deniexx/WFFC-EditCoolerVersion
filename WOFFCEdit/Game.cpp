@@ -8,7 +8,9 @@
 #include <sstream>
 #include <iomanip>
 #include <string>
-
+#include "vendor/imgui/imgui.h"
+#include "vendor/imgui/backends/imgui_impl_win32.h"
+#include "vendor/imgui/backends/imgui_impl_dx11.h"
 
 using namespace DirectX;
 using namespace DirectX::SimpleMath;
@@ -32,7 +34,9 @@ Game::Game()
 
 Game::~Game()
 {
-
+    ImGui_ImplDX11_Shutdown();
+    ImGui_ImplWin32_Shutdown();
+    ImGui::DestroyContext();
 #ifdef DXTK_AUDIO
     if (m_audEngine)
     {
@@ -95,6 +99,11 @@ void Game::SetGridState(bool state)
 // Executes the basic game loop.
 void Game::Tick(InputCommands *Input)
 {
+    // (Your code process and dispatch Win32 messages)
+    ImGui_ImplDX11_NewFrame();
+    ImGui_ImplWin32_NewFrame();
+    ImGui::NewFrame();
+
 	//copy over the input commands so we have a local version to use elsewhere.
 	m_InputCommands = *Input;
     m_timer.Tick([&]()
@@ -197,39 +206,10 @@ void Game::Update(DX::StepTimer const& timer)
     }
 
     bool wasLMBReleased = m_lmbDownLastFrame == true && mouseState.leftButton == false;
-    if (wasLMBReleased)
+    if (wasLMBReleased && !ImGui::IsAnyItemHovered())
     {
         int selected = PickObjectUnderMouse();
-        if (m_InputCommands.shiftDown)
-        {
-            // Unselect object if it is already in the array
-            if (std::find(m_pickedObjects.begin(), m_pickedObjects.end(), selected) != m_pickedObjects.end())
-            {
-                m_pickedObjects.erase(std::remove(m_pickedObjects.begin(), m_pickedObjects.end(), selected), m_pickedObjects.end());
-            }
-            else
-            {
-                m_pickedObjects.push_back(selected);
-            }
-        }
-        else
-        {
-            if (m_pickedObjects.size() > 1)
-            {
-                m_pickedObjects.clear();
-            }
-
-            if (std::find(m_pickedObjects.begin(), m_pickedObjects.end(), selected) != m_pickedObjects.end())
-            {
-                m_pickedObjects.clear();
-            }
-            else
-            {
-                m_pickedObjects.clear();
-                m_pickedObjects.push_back(selected);
-            }
-
-        }
+        HandleObjectPicking(selected);
     }
 
     m_camera->Update();
@@ -341,7 +321,7 @@ void Game::Render()
     m_font->DrawString(m_sprites.get(), mouse.c_str(), XMFLOAT2(100, 35), Colors::Yellow);
 
     m_sprites->End();
-
+    DrawImGui();
     m_deviceResources->Present();
 }
 
@@ -364,6 +344,11 @@ void Game::Clear()
     context->RSSetViewports(1, &viewport);
 
     m_deviceResources->PIXEndEvent();
+}
+
+std::shared_ptr<DX::DeviceResources> Game::GetDeviceResources()
+{
+    return m_deviceResources;
 }
 
 void XM_CALLCONV Game::DrawGrid(FXMVECTOR xAxis, FXMVECTOR yAxis, FXMVECTOR origin, size_t xdivs, size_t ydivs, GXMVECTOR color)
@@ -713,6 +698,51 @@ int Game::PickObjectUnderMouse()
     return selectedID;
 }
 
+void Game::HandleObjectPicking(int selected)
+{
+    if (m_InputCommands.shiftDown)
+    {
+        if (selected == -1)
+        {
+            return;
+        }
+
+        // Unselect object if it is already in the array
+        if (std::find(m_pickedObjects.begin(), m_pickedObjects.end(), selected) != m_pickedObjects.end())
+        {
+            m_pickedObjects.erase(std::remove(m_pickedObjects.begin(), m_pickedObjects.end(), selected), m_pickedObjects.end());
+        }
+        else
+        {
+            m_pickedObjects.push_back(selected);
+        }
+    }
+    else
+    {
+        if (selected == -1)
+        {
+            m_pickedObjects.clear();
+            return;
+        }
+
+        if (m_pickedObjects.size() > 1)
+        {
+            m_pickedObjects.clear();
+        }
+
+        if (std::find(m_pickedObjects.begin(), m_pickedObjects.end(), selected) != m_pickedObjects.end())
+        {
+            m_pickedObjects.clear();
+        }
+        else
+        {
+            m_pickedObjects.clear();
+            m_pickedObjects.push_back(selected);
+        }
+
+    }
+}
+
 void Game::OnDeviceLost()
 {
     m_states.reset();
@@ -747,4 +777,77 @@ std::wstring StringToWCHART(std::string s)
 	std::wstring r(buf);
 	delete[] buf;
 	return r;
+}
+
+void Game::DrawImGui()
+{
+    if (!ImGui::Begin("Editor View"))
+    {
+        ImGui::End();
+    }
+
+    DrawHierarchy();
+
+    ImGui::End();
+    ImGui::Render();
+    ImGui_ImplDX11_RenderDrawData(ImGui::GetDrawData());
+}
+
+void Game::DrawHierarchy()
+{
+    if (ImGui::CollapsingHeader("Hierarchy")) 
+    {
+        ImGui::SetWindowFontScale(1.5f);
+        ImVec2 buttonSize = ImGui::GetContentRegionAvail();
+        buttonSize.y = 24.f;
+        ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.f, 0.f, 0.f, 1.f));
+        for (int i = 0; i < m_displayList.size(); ++i)
+        {
+            std::string text = std::to_string(i);
+            ImVec4 color = ImVec4(1.f ,1.f, 1.f, 1.f);
+            if (std::find(m_pickedObjects.begin(), m_pickedObjects.end(), i) != m_pickedObjects.end())
+            {
+                color = ImVec4(0.47f, 0.67f, 0.97f, 1.f);
+            }
+            ImGui::PushStyleColor(ImGuiCol_Button, color);
+            if (ImGui::Button(text.c_str(), buttonSize))
+            {
+                HandleObjectPicking(i);
+            }
+            ImGui::PopStyleColor();
+        }
+        ImGui::SetWindowFontScale(1.f);
+        ImGui::PopStyleColor();
+    }
+
+    ImGui::BeginChild("Transform");
+    if (ImGui::CollapsingHeader("Transform"))
+    {
+        if (m_pickedObjects.size() == 0)
+        {
+            ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1.f, 0.f, 0.f, 1.f));
+            ImGui::SetWindowFontScale(1.5f);
+            ImGui::Text("Please select an object");
+            ImGui::SetWindowFontScale(1.f);
+            ImGui::PopStyleColor();
+        }
+        else
+        {
+            ImGui::SeparatorText("Translation:");
+            int index = m_pickedObjects[m_pickedObjects.size() - 1];
+            ImGui::PushID("Translation");
+            ImGui::InputFloat3("XYZ:", &m_displayList[index].m_position.x);
+            ImGui::PopID();
+
+            ImGui::SeparatorText("Rotation:");
+            ImGui::PushID("Rotation");
+            ImGui::InputFloat3("XYZ:", &m_displayList[index].m_orientation.x);
+            ImGui::PopID();
+
+            ImGui::SeparatorText("Scale:");
+            ImGui::InputFloat3("XYZ:", &m_displayList[index].m_scale.x);
+        }
+    }
+
+    ImGui::EndChild();
 }

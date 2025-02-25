@@ -13,3 +13,11 @@ C:\GameDev\WFFC-EditCoolerVersion\WOFFCEdit\SceneObject.cpp;C:\GameDev\WFFC-Edit
 C:\GameDev\WFFC-EditCoolerVersion\WOFFCEdit\SelectDialogue.cpp;C:\GameDev\WFFC-EditCoolerVersion\WOFFCEdit\WoFEdit\Debug\SelectDialogue.obj
 C:\GameDev\WFFC-EditCoolerVersion\WOFFCEdit\sqlite3.c;C:\GameDev\WFFC-EditCoolerVersion\WOFFCEdit\WoFEdit\Debug\sqlite3.obj
 C:\GameDev\WFFC-EditCoolerVersion\WOFFCEdit\ToolMain.cpp;C:\GameDev\WFFC-EditCoolerVersion\WOFFCEdit\WoFEdit\Debug\ToolMain.obj
+C:\GameDev\WFFC-EditCoolerVersion\WOFFCEdit\vendor\imgui\backends\imgui_impl_dx11.cpp;C:\GameDev\WFFC-EditCoolerVersion\WOFFCEdit\WoFEdit\Debug\imgui_impl_dx11.obj
+C:\GameDev\WFFC-EditCoolerVersion\WOFFCEdit\vendor\imgui\backends\imgui_impl_win32.cpp;C:\GameDev\WFFC-EditCoolerVersion\WOFFCEdit\WoFEdit\Debug\imgui_impl_win32.obj
+C:\GameDev\WFFC-EditCoolerVersion\WOFFCEdit\vendor\imgui\imgui.cpp;C:\GameDev\WFFC-EditCoolerVersion\WOFFCEdit\WoFEdit\Debug\imgui.obj
+C:\GameDev\WFFC-EditCoolerVersion\WOFFCEdit\vendor\imgui\imgui_demo.cpp;C:\GameDev\WFFC-EditCoolerVersion\WOFFCEdit\WoFEdit\Debug\imgui_demo.obj
+C:\GameDev\WFFC-EditCoolerVersion\WOFFCEdit\vendor\imgui\imgui_draw.cpp;C:\GameDev\WFFC-EditCoolerVersion\WOFFCEdit\WoFEdit\Debug\imgui_draw.obj
+C:\GameDev\WFFC-EditCoolerVersion\WOFFCEdit\vendor\imgui\imgui_tables.cpp;C:\GameDev\WFFC-EditCoolerVersion\WOFFCEdit\WoFEdit\Debug\imgui_tables.obj
+C:\GameDev\WFFC-EditCoolerVersion\WOFFCEdit\vendor\imgui\imgui_widgets.cpp;C:\GameDev\WFFC-EditCoolerVersion\WOFFCEdit\WoFEdit\Debug\imgui_widgets.obj
+C:\GameDev\WFFC-EditCoolerVersion\WOFFCEdit\vendor\imgui\misc\cpp\imgui_stdlib.cpp;C:\GameDev\WFFC-EditCoolerVersion\WOFFCEdit\WoFEdit\Debug\imgui_stdlib.obj
