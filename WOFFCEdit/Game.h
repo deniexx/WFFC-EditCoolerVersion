@@ -99,7 +99,7 @@ private:
 	HWND m_hwnd;
 	HCURSOR m_cursor;
 
-	int m_transformDragStep = 1;
+	float m_transformDragStep = 1.f;
 
     // DirectXTK objects.
     std::unique_ptr<DirectX::CommonStates>                                  m_states;
@@ -125,6 +125,7 @@ private:
 	
 	bool m_lmbDownLastFrame = false;
 	bool m_rmbDownLastFrame = false;
+	bool m_syncScale = false;
 
 #ifdef DXTK_AUDIO
     uint32_t                                                                m_audioEvent;

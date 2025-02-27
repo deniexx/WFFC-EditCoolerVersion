@@ -862,15 +862,34 @@ void Game::DrawHierarchy()
             ImGui::PopItemWidth();
             ImGui::PopID();
 
+            
             ImGui::SeparatorText("Scale:");
-            ImGui::PushItemWidth(ImGui::CalcItemWidth() / 2.1);
-            ImGui::DragFloat("##X", &m_displayList[index].m_scale.x, m_transformDragStep, 0.f, 0.f, "X: %.2f");
-            ImGui::SameLine(); ImGui::DragFloat("##Y", &m_displayList[index].m_scale.y, 1.f, 0.f, 0.f, "Y: %.2f");
-            ImGui::SameLine(); ImGui::DragFloat("##Z", &m_displayList[index].m_scale.z, 1.f, 0.f, 0.f, "Z: %.2f");
-            ImGui::PopItemWidth();
+            ImGui::PushItemWidth(ImGui::CalcItemWidth() / 2.2);
+            ImGui::Checkbox("##Sc", &m_syncScale);
 
-            ImGui::Text("Step: ");
-            ImGui::SameLine(); ImGui::DragInt("##S", &m_transformDragStep, 1.0, 1, 10);
+            ImGui::SameLine();
+            if (ImGui::DragFloat("##X", &m_displayList[index].m_scale.x, m_transformDragStep, 0.f, 0.f, "X: %.2f"))
+            {
+                m_displayList[index].m_scale.y = m_displayList[index].m_scale.x;
+                m_displayList[index].m_scale.z = m_displayList[index].m_scale.x;
+            }
+
+            ImGui::SameLine();
+            if (ImGui::DragFloat("##Y", &m_displayList[index].m_scale.y, 1.f, 0.f, 0.f, "Y: %.2f"))
+            {
+                m_displayList[index].m_scale.x = m_displayList[index].m_scale.y;
+                m_displayList[index].m_scale.z = m_displayList[index].m_scale.y;
+            }
+
+            ImGui::SameLine();
+            if (ImGui::DragFloat("##Z", &m_displayList[index].m_scale.z, 1.f, 0.f, 0.f, "Z: %.2f"))
+            {
+                m_displayList[index].m_scale.x = m_displayList[index].m_scale.z;
+                m_displayList[index].m_scale.y = m_displayList[index].m_scale.z;
+            }
+
+            ImGui::PopItemWidth();
+            ImGui::DragFloat("##S", &m_transformDragStep, 0.25f, 0.25f, 10.f, "Step: %0.2f");
         }
     }
 
