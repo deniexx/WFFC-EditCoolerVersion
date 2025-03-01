@@ -12,8 +12,10 @@
 #include "ChunkObject.h"
 #include "InputCommands.h"
 #include <vector>
-
+#include <memory>
 #include "Camera.h"
+
+class Command;
 
 // A basic game implementation that creates a D3D11 device and
 // provides a game loop.
@@ -54,7 +56,17 @@ public:
 	void SaveDisplayChunk(ChunkObject *SceneChunk);	//saves geometry et al
 	void ClearDisplayList();
 
+
+	void SetPickedObjectsVector(std::vector<int> newPickedObjects);
+	void SetPickedObject(int id);
+	void AddPickedObject(int id);
+	void RemovePickedObject(int id);
+	void ExecuteCommand(std::shared_ptr<Command> command);
+	void UndoCommand();
+	void RedoCommand();
+
 	const std::vector<int>& GetPickedObjects();
+	std::vector<int> GetPickedObjectsCopy() const;
 
 #ifdef DXTK_AUDIO
 	void NewAudioDevice();
@@ -63,7 +75,7 @@ public:
 private:
 
 	void Update(DX::StepTimer const& timer);
-
+	void UpdateHotkeys();
 	void CreateDeviceDependentResources();
 	void CreateWindowSizeDependentResources();
 
@@ -78,7 +90,7 @@ private:
 	//tool specific
 	std::vector<DisplayObject>			m_displayList;
 	DisplayChunk						m_displayChunk;
-	InputCommands						m_InputCommands;
+	InputCommands*						m_InputCommands;
 
 	//control variables
 	bool m_grid;							//grid rendering on / off
@@ -88,16 +100,19 @@ private:
     // Rendering loop timer.
     DX::StepTimer                           m_timer;
 
+	std::vector<std::shared_ptr<Command>>	m_undoStack;
+	std::vector<std::shared_ptr<Command>>	m_redoStack;
+
     // Input devices.
     std::unique_ptr<DirectX::GamePad>       m_gamePad;
     std::unique_ptr<DirectX::Keyboard>      m_keyboard;
     std::unique_ptr<DirectX::Mouse>         m_mouse;
 	std::unique_ptr<Camera>					m_camera;
 
-	std::vector<int> m_pickedObjects;
-	Vector3 m_lastMouse;
-	HWND m_hwnd;
-	HCURSOR m_cursor;
+	std::vector<int>						m_pickedObjects;
+	Vector3									m_lastMouse;
+	HWND									m_hwnd;
+	HCURSOR									m_cursor;
 
 	float m_transformDragStep = 1.f;
 
@@ -126,6 +141,10 @@ private:
 	bool m_lmbDownLastFrame = false;
 	bool m_rmbDownLastFrame = false;
 	bool m_syncScale = false;
+	bool m_wasZDown = false;
+	bool m_wasYDown = false;
+	bool m_zReleased = false;
+	bool m_yReleased = false;
 
 #ifdef DXTK_AUDIO
     uint32_t                                                                m_audioEvent;

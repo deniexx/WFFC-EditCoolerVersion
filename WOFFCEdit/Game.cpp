@@ -3,7 +3,6 @@
 //
 
 #include "pch.h"
-#include "Game.h"
 #include "DisplayObject.h"
 #include <sstream>
 #include <iomanip>
@@ -11,11 +10,15 @@
 #include "vendor/imgui/imgui.h"
 #include "vendor/imgui/backends/imgui_impl_win32.h"
 #include "vendor/imgui/backends/imgui_impl_dx11.h"
+#include "Game.h"
+#include "Command.h"
 
 using namespace DirectX;
 using namespace DirectX::SimpleMath;
 
 using Microsoft::WRL::ComPtr;
+
+#include "SelectionCommand.h"
 
 Game::Game()
 
@@ -105,7 +108,7 @@ void Game::Tick(InputCommands *Input)
     ImGui::NewFrame();
 
 	//copy over the input commands so we have a local version to use elsewhere.
-	m_InputCommands = *Input;
+	m_InputCommands = Input;
     m_timer.Tick([&]()
     {
         Update(m_timer);
@@ -162,45 +165,28 @@ void Game::Update(DX::StepTimer const& timer)
         {
             SetCursor(m_cursor);
         }
-
-        if (m_InputCommands.rotRight)
-        {
-            m_camera->AddPitchInput(1.f);
-        }
-        if (m_InputCommands.rotLeft)
-        {
-            m_camera->AddPitchInput(-1.f);
-        }
-        if (m_InputCommands.lookUp)
-        {
-            m_camera->AddYawInput(1.f);
-        }
-        if (m_InputCommands.lookDown)
-        {
-            m_camera->AddYawInput(-1.f);
-        }
     }
-    if (m_InputCommands.forward)
+    if (m_InputCommands->forward)
     {
         m_camera->AddMovementInput(Vector3(1.f, 0.f, 0.f));
     }
-    if (m_InputCommands.back)
+    if (m_InputCommands->back)
     {
         m_camera->AddMovementInput(Vector3(-1.f, 0.f, 0.f));
     }
-    if (m_InputCommands.right)
+    if (m_InputCommands->right)
     {
         m_camera->AddMovementInput(Vector3(0.f, 0.f, 1.f));
     }
-    if (m_InputCommands.left)
+    if (m_InputCommands->left)
     {
         m_camera->AddMovementInput(Vector3(0.f, 0.f, -1.f));
     }
-    if (m_InputCommands.up)
+    if (m_InputCommands->up)
     {
         m_camera->AddMovementInput(Vector3(0.f, 1.f, 0.f));
     }
-    if (m_InputCommands.down)
+    if (m_InputCommands->down)
     {
         m_camera->AddMovementInput(Vector3(0.f, -1.f, 0.f));
     }
@@ -222,6 +208,7 @@ void Game::Update(DX::StepTimer const& timer)
     m_lmbDownLastFrame = mouseState.leftButton;
 
     m_lastMouse = Vector3(mouseState.x, mouseState.y, 0.f);
+    UpdateHotkeys();
 
 #ifdef DXTK_AUDIO
     m_audioTimerAcc -= (float)timer.GetElapsedSeconds();
@@ -249,6 +236,26 @@ void Game::Update(DX::StepTimer const& timer)
 #endif
 
    
+}
+void Game::UpdateHotkeys()
+{
+    m_zReleased = m_wasZDown && !m_InputCommands->zDown;
+    m_yReleased = m_wasYDown && !m_InputCommands->yDown;
+
+    if (m_InputCommands->controlDown)
+    {
+        if (m_zReleased)
+        {
+            UndoCommand();
+        }
+        else if (m_yReleased)
+        {
+            RedoCommand();
+        }   
+    }
+
+    m_wasZDown = m_InputCommands->zDown;
+    m_wasYDown = m_InputCommands->yDown;
 }
 #pragma endregion
 
@@ -509,10 +516,7 @@ void Game::BuildDisplayList(std::vector<SceneObject> * SceneGraph)
 		
 		m_displayList.push_back(newDisplayObject);
 		
-	}
-		
-		
-		
+	}	
 }
 
 void Game::BuildDisplayChunk(ChunkObject * SceneChunk)
@@ -530,9 +534,80 @@ void Game::SaveDisplayChunk(ChunkObject * SceneChunk)
 	m_displayChunk.SaveHeightMap();			//save heightmap to file.
 }
 
+void Game::ExecuteCommand(std::shared_ptr<Command> command)
+{
+    command->Execute(this);
+    m_undoStack.push_back(command);
+    m_redoStack.clear();
+
+    if (m_undoStack.size() > 30)
+    {
+        m_undoStack.erase(m_undoStack.begin());
+    }
+}
+
+void Game::UndoCommand()
+{
+    if (m_undoStack.empty())
+    {
+        return;
+    }
+
+    m_redoStack.push_back(m_undoStack[m_undoStack.size() - 1]);
+    if (m_redoStack.size() > 30)
+    {
+        m_undoStack.erase(m_undoStack.begin());
+    }
+    m_undoStack[m_undoStack.size() - 1]->Undo();
+    m_undoStack.pop_back();
+}
+
+void Game::RedoCommand()
+{
+    if (m_redoStack.empty())
+    {
+        return;
+    }
+
+    m_undoStack.push_back(m_redoStack[m_redoStack.size() - 1]);
+    if (m_undoStack.size() > 30)
+    {
+        m_undoStack.erase(m_undoStack.begin());
+    }
+    m_redoStack[m_redoStack.size() - 1]->Execute(this);
+    m_redoStack.pop_back();
+}
+
 const std::vector<int>& Game::GetPickedObjects()
 {
     return m_pickedObjects;
+}
+
+std::vector<int> Game::GetPickedObjectsCopy() const
+{
+    return m_pickedObjects;
+}
+
+void Game::SetPickedObjectsVector(std::vector<int> newPickedObjects)
+{
+    m_pickedObjects = newPickedObjects;
+}
+
+void Game::SetPickedObject(int id)
+{
+    m_pickedObjects.clear();
+    AddPickedObject(id);
+}
+
+
+void Game::AddPickedObject(int id)
+{
+    m_pickedObjects.push_back(id);
+}
+
+void Game::RemovePickedObject(int id)
+{
+    m_pickedObjects.erase(std::remove(m_pickedObjects.begin(), m_pickedObjects.end(), id), m_pickedObjects.end());
 }
 
 #ifdef DXTK_AUDIO
@@ -700,7 +775,7 @@ int Game::PickObjectUnderMouse()
 
 void Game::HandleObjectPicking(int selected)
 {
-    if (m_InputCommands.shiftDown)
+    if (m_InputCommands->shiftDown)
     {
         if (selected == -1)
         {
@@ -710,18 +785,18 @@ void Game::HandleObjectPicking(int selected)
         // Unselect object if it is already in the array
         if (std::find(m_pickedObjects.begin(), m_pickedObjects.end(), selected) != m_pickedObjects.end())
         {
-            m_pickedObjects.erase(std::remove(m_pickedObjects.begin(), m_pickedObjects.end(), selected), m_pickedObjects.end());
+            ExecuteCommand(std::make_shared<SelectionCommand>(selected, SelectionType::Remove));
         }
         else
         {
-            m_pickedObjects.push_back(selected);
+            ExecuteCommand(std::make_shared<SelectionCommand>(selected, SelectionType::Add));
         }
     }
     else
     {
         if (selected == -1)
         {
-            m_pickedObjects.clear();
+            ExecuteCommand(std::make_shared<SelectionCommand>(selected, SelectionType::Clear));
             return;
         }
 
@@ -732,12 +807,11 @@ void Game::HandleObjectPicking(int selected)
 
         if (std::find(m_pickedObjects.begin(), m_pickedObjects.end(), selected) != m_pickedObjects.end())
         {
-            m_pickedObjects.clear();
+            ExecuteCommand(std::make_shared<SelectionCommand>(selected, SelectionType::Remove));
         }
         else
         {
-            m_pickedObjects.clear();
-            m_pickedObjects.push_back(selected);
+            ExecuteCommand(std::make_shared<SelectionCommand>(selected, SelectionType::Set));
         }
 
     }
@@ -781,7 +855,7 @@ std::wstring StringToWCHART(std::string s)
 
 void Game::DrawImGui()
 {
-    if (!ImGui::Begin("World Outliner"))
+    if (!ImGui::Begin("Debug View"))
     {
         ImGui::End();
     }
@@ -798,100 +872,68 @@ void Game::DrawImGui()
 
 void Game::DrawHierarchy()
 {
-    ImVec2 contentRegion = ImGui::GetContentRegionAvail();
-    contentRegion.y /= 1.5f;
-    ImGui::BeginChild("Hierarchy", contentRegion);
-    if (ImGui::CollapsingHeader("Hierarchy")) 
+    if (ImGui::CollapsingHeader("Debug Variables"))
     {
-        ImGui::SetWindowFontScale(1.2f);
-        ImVec2 buttonSize = ImGui::GetContentRegionAvail();
-        buttonSize.x -= 12.f;
-        buttonSize.y = 18.f;
-        ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.f, 0.f, 0.f, 1.f));
-        for (int i = 0; i < m_displayList.size(); ++i)
-        {
-            std::string text = std::to_string(i);
-            ImVec4 color = ImVec4(1.f ,1.f, 1.f, 1.f);
-            if (std::find(m_pickedObjects.begin(), m_pickedObjects.end(), i) != m_pickedObjects.end())
-            {
-                color = ImVec4(0.47f, 0.67f, 0.97f, 1.f);
-            }
-            ImGui::PushStyleColor(ImGuiCol_Button, color);
-            if (ImGui::Button(text.c_str(), buttonSize))
-            {
-                HandleObjectPicking(i);
-            }
-            ImGui::PopStyleColor();
-        }
+        ImGui::Indent();
+        DirectX::Mouse::State mouseState = m_mouse->GetState();
+        std::stringstream stream;
+        stream << "Cam X: " << std::fixed << std::setprecision(2) << m_camera->GetCameraPosition().x;
+        stream << " Cam Z: " << std::fixed << std::setprecision(2) << m_camera->GetCameraPosition().z;
+        std::string streamedString = stream.str();
+        ImGui::Text(streamedString.c_str());
+
+        std::string mousePosString = "Mouse X: " + std::to_string(mouseState.x) + " Mouse Y: " + std::to_string(mouseState.y);
+        ImGui::Text(mousePosString.c_str());
         ImGui::SetWindowFontScale(1.f);
-        ImGui::PopStyleColor();
+
+        std::string selectedObjectsString = "Selected Objects: " + std::to_string(m_pickedObjects.size());
+        ImGui::Text(selectedObjectsString.c_str());
+        if (ImGui::CollapsingHeader("All Selected Objects"))
+        {
+            std::string allSelectedObjectsString = "";
+            for (int i = 0; i < m_pickedObjects.size(); ++i)
+            {
+                allSelectedObjectsString += std::to_string(m_pickedObjects[i]);
+                if (i != m_pickedObjects.size() - 1)
+                {
+                    allSelectedObjectsString += ", ";
+                }
+            }
+
+            ImGui::Text(allSelectedObjectsString.c_str());
+        }
+        ImGui::Unindent();
     }
-    ImGui::EndChild();
 
-
-    ImGui::BeginChild("Transform");
-    if (ImGui::CollapsingHeader("Transform"))
+    if (ImGui::CollapsingHeader("Undo/Redo"))
     {
-        if (m_pickedObjects.size() == 0)
+        ImGui::Indent();
+        std::string undoStackSizeString = "Undo Stack Size: " + std::to_string(m_undoStack.size());
+        ImGui::Text(undoStackSizeString.c_str());
+        if (ImGui::CollapsingHeader("Undo Stack:"))
         {
-            ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1.f, 0.f, 0.f, 1.f));
-            ImGui::SetWindowFontScale(1.5f);
-            ImGui::Text("Please select an object");
-            ImGui::SetWindowFontScale(1.f);
-            ImGui::PopStyleColor();
+            ImGui::Indent();
+            for (const auto command : m_undoStack)
+            {
+                ImGui::Text(command->GetName().c_str());
+                ImGui::BulletText(command->GetDebugData().c_str());
+            }
+            ImGui::Unindent();
         }
-        else
+
+        std::string redoStackSizeString = "Redo Stack Size: " + std::to_string(m_redoStack.size());
+        ImGui::Text(redoStackSizeString.c_str());
+        if (ImGui::CollapsingHeader("Redo Stack:"))
         {
-            int index = m_pickedObjects[m_pickedObjects.size() - 1];
-
-            ImGui::SeparatorText("Translation:");
-            ImGui::PushID("Translation");
-            ImGui::PushItemWidth(ImGui::CalcItemWidth() / 2.1);
-            ImGui::DragFloat("##X", &m_displayList[index].m_position.x, m_transformDragStep, 0.f, 0.f, "X: %.2f");
-            ImGui::SameLine(); ImGui::DragFloat("##Y", &m_displayList[index].m_position.y, 1.f, 0.f, 0.f, "Y: %.2f");
-            ImGui::SameLine(); ImGui::DragFloat("##Z", &m_displayList[index].m_position.z, 1.f, 0.f, 0.f, "Z: %.2f");
-            ImGui::PopItemWidth();
-            ImGui::PopID();
-
-            ImGui::SeparatorText("Rotation:");
-            ImGui::PushID("Rotation");
-            ImGui::PushItemWidth(ImGui::CalcItemWidth() / 2.1);
-            ImGui::DragFloat("##X", &m_displayList[index].m_orientation.x, m_transformDragStep, 0.f, 0.f, "X: %.2f");
-            ImGui::SameLine(); ImGui::DragFloat("##Y", &m_displayList[index].m_orientation.y, 1.f, 0.f, 0.f, "Y: %.2f");
-            ImGui::SameLine(); ImGui::DragFloat("##Z", &m_displayList[index].m_orientation.z, 1.f, 0.f, 0.f, "Z: %.2f");
-            ImGui::PopItemWidth();
-            ImGui::PopID();
-
+            ImGui::Indent();
+            for (const auto command : m_redoStack)
+            {
+                ImGui::Text(command->GetName().c_str());
+                ImGui::BulletText(command->GetDebugData().c_str());
+            }
+            ImGui::Unindent();
+        }
+        ImGui::Unindent();
             
-            ImGui::SeparatorText("Scale:");
-            ImGui::PushItemWidth(ImGui::CalcItemWidth() / 2.2);
-            ImGui::Checkbox("##Sc", &m_syncScale);
-
-            ImGui::SameLine();
-            if (ImGui::DragFloat("##X", &m_displayList[index].m_scale.x, m_transformDragStep, 0.f, 0.f, "X: %.2f"))
-            {
-                m_displayList[index].m_scale.y = m_displayList[index].m_scale.x;
-                m_displayList[index].m_scale.z = m_displayList[index].m_scale.x;
-            }
-
-            ImGui::SameLine();
-            if (ImGui::DragFloat("##Y", &m_displayList[index].m_scale.y, 1.f, 0.f, 0.f, "Y: %.2f"))
-            {
-                m_displayList[index].m_scale.x = m_displayList[index].m_scale.y;
-                m_displayList[index].m_scale.z = m_displayList[index].m_scale.y;
-            }
-
-            ImGui::SameLine();
-            if (ImGui::DragFloat("##Z", &m_displayList[index].m_scale.z, 1.f, 0.f, 0.f, "Z: %.2f"))
-            {
-                m_displayList[index].m_scale.x = m_displayList[index].m_scale.z;
-                m_displayList[index].m_scale.y = m_displayList[index].m_scale.z;
-            }
-
-            ImGui::PopItemWidth();
-            ImGui::DragFloat("##S", &m_transformDragStep, 0.25f, 0.25f, 10.f, "Step: %0.2f");
-        }
     }
-
-    ImGui::EndChild();
 }

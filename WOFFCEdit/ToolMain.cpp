@@ -286,6 +286,16 @@ void ToolMain::onActionSaveTerrain()
 	m_d3dRenderer.SaveDisplayChunk(&m_chunk);
 }
 
+void ToolMain::onUndoButton()
+{
+	m_d3dRenderer.UndoCommand();
+}
+
+void ToolMain::onRedoButton()
+{
+	m_d3dRenderer.RedoCommand();
+}
+
 void ToolMain::Tick(MSG *msg)
 {
 	//do we have a selection
@@ -358,17 +368,6 @@ void ToolMain::UpdateInput(MSG * msg)
 		m_toolInputCommands.right = true;
 	}
 	else m_toolInputCommands.right = false;
-	//rotation
-	if (m_keyArray['X'])
-	{
-		m_toolInputCommands.rotRight = true;
-	}
-	else m_toolInputCommands.rotRight = false;
-	if (m_keyArray['Z'])
-	{
-		m_toolInputCommands.rotLeft = true;
-	}
-	else m_toolInputCommands.rotLeft = false;
 	if (m_keyArray['Q'])
 	{
 		m_toolInputCommands.down = true;
@@ -379,19 +378,24 @@ void ToolMain::UpdateInput(MSG * msg)
 		m_toolInputCommands.up = true;
 	}
 	else m_toolInputCommands.up = false;
-	if (m_keyArray['R'])
-	{
-		m_toolInputCommands.lookUp = true;
-	}
-	else m_toolInputCommands.lookUp = false;
-	if (m_keyArray['F'])
-	{
-		m_toolInputCommands.lookDown = true;
-	}
-	else m_toolInputCommands.lookDown = false;
 	if (m_keyArray[VK_SHIFT])
 	{
 		m_toolInputCommands.shiftDown = true;
 	}
 	else m_toolInputCommands.shiftDown = false;	
+	if (m_keyArray[VK_CONTROL])
+	{
+		m_toolInputCommands.controlDown = true;
+	}
+	else m_toolInputCommands.controlDown = false;
+	if (m_keyArray['Z'])
+	{
+		m_toolInputCommands.zDown = true;
+	}
+	else m_toolInputCommands.zDown = false;
+	if (m_keyArray['Y'])
+	{
+		m_toolInputCommands.yDown = true;
+	}
+	else m_toolInputCommands.yDown = false;
 }

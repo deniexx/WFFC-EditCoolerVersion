@@ -8,10 +8,9 @@ struct InputCommands
 	bool left = false;
 	bool up = false;
 	bool down = false;
-	bool rotRight = false;
-	bool rotLeft = false;
-	bool lookUp = false;
-	bool lookDown = false;
 
+	bool zDown = false;
+	bool yDown = false;
 	bool shiftDown = false;
+	bool controlDown = false;
 };

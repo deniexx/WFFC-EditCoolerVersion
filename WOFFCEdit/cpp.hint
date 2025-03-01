@@ -1,0 +1,4 @@
+// Hint files help the Visual Studio IDE interpret Visual C++ identifiers
+// such as names of functions and macros.
+// For more information see https://go.microsoft.com/fwlink/?linkid=865984
+#define COMMAND_INTERFACE_DEFINITION virtual void Execute(Game* game) override; virtual void Undo() override; virtual std::string GetName() const override; virtual std::string GetDebugData() const override

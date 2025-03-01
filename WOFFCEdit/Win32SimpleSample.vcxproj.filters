@@ -20,6 +20,9 @@
     <Filter Include="ImGui">
       <UniqueIdentifier>{3d30d78a-5cac-4a6d-865d-62114ad6ad93}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Command">
+      <UniqueIdentifier>{445e1c31-3547-409f-9c19-8816c5a5c8ee}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp">
@@ -86,6 +89,9 @@
     </ClCompile>
     <ClCompile Include="vendor\imgui\imgui_tables.cpp">
       <Filter>ImGui</Filter>
+    </ClCompile>
+    <ClCompile Include="SelectionCommand.cpp">
+      <Filter>Command</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -157,6 +163,12 @@
     </ClInclude>
     <ClInclude Include="vendor\imgui\imconfig.h">
       <Filter>ImGui</Filter>
+    </ClInclude>
+    <ClInclude Include="Command.h">
+      <Filter>Command</Filter>
+    </ClInclude>
+    <ClInclude Include="SelectionCommand.h">
+      <Filter>Command</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

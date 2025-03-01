@@ -7,6 +7,8 @@ BEGIN_MESSAGE_MAP(MFCMain, CWinApp)
 	ON_COMMAND(ID_FILE_SAVETERRAIN, &MFCMain::MenuFileSaveTerrain)
 	ON_COMMAND(ID_EDIT_SELECT, &MFCMain::MenuEditSelect)
 	ON_COMMAND(ID_BUTTON40001,	&MFCMain::ToolBarButton1)
+	ON_COMMAND(ID_EDIT_UNDO, &MFCMain::UndoButton)
+	ON_COMMAND(ID_EDIT_REDO, &MFCMain::RedoButton)
 	ON_UPDATE_COMMAND_UI(ID_INDICATOR_TOOL, &CMyFrame::OnUpdatePage)
 END_MESSAGE_MAP()
 
@@ -114,6 +116,15 @@ void MFCMain::ToolBarButton1()
 	m_ToolSystem.onActionSave();
 }
 
+void MFCMain::UndoButton()
+{
+	m_ToolSystem.onUndoButton();
+}
+
+void MFCMain::RedoButton()
+{
+	m_ToolSystem.onRedoButton();
+}
 
 MFCMain::MFCMain()
 {
