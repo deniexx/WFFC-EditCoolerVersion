@@ -19,6 +19,6 @@ public:
 
 protected:
 
-	Game* m_game;
+	Game* m_game = nullptr;
 };
 

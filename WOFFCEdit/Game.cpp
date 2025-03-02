@@ -296,7 +296,23 @@ void Game::Render()
 															m_displayList[i].m_orientation.z *3.1415 / 180);
 
 		XMMATRIX local = m_world * XMMatrixTransformation(g_XMZero, Quaternion::Identity, scale, g_XMZero, rotate, translate);
-
+        
+        if (std::find(m_pickedObjects.begin(), m_pickedObjects.end(), i) != m_pickedObjects.end())
+        {
+            m_displayList[i].m_model->UpdateEffects(
+                [](DirectX::IEffect* effect) {
+                    static_cast<BasicEffect*>(effect)->SetColorAndAlpha({1.f, 0.f, 0.f, 1.f });
+                }
+            );
+        }
+        else
+        {
+            m_displayList[i].m_model->UpdateEffects(
+                [](DirectX::IEffect* effect) {
+                    static_cast<BasicEffect*>(effect)->SetColorAndAlpha({ 1.f, 1.f, 1.f, 1.f });
+                }
+            );
+        }
 		m_displayList[i].m_model->Draw(context, *m_states, local, m_camera->GetViewMatrix(), m_projection, false);	//last variable in draw,  make TRUE for wireframe
 
 		m_deviceResources->PIXEndEvent();
@@ -313,21 +329,6 @@ void Game::Render()
 	m_displayChunk.RenderBatch(m_deviceResources);
 
     DirectX::Mouse::State mouseState = m_mouse->GetState();
-    //CAMERA POSITION ON HUD
-    m_sprites->Begin();
-    WCHAR   Buffer[256];
-    
-    std::stringstream stream;
-    stream << "Cam X: " << std::fixed << std::setprecision(2) << m_camera->GetCameraPosition().x;
-    stream << " Cam Z: " << std::fixed << std::setprecision(2) << m_camera->GetCameraPosition().z;
-    
-    std::string streamed = stream.str();
-    std::wstring var(streamed.begin(), streamed.end());
-    m_font->DrawString(m_sprites.get(), var.c_str(), XMFLOAT2(100, 10), Colors::Yellow);
-    std::wstring mouse = L"Mouse X: " + std::to_wstring(mouseState.x) + L" Mouse Y: " + std::to_wstring(mouseState.y);
-    m_font->DrawString(m_sprites.get(), mouse.c_str(), XMFLOAT2(100, 35), Colors::Yellow);
-
-    m_sprites->End();
     DrawImGui();
     m_deviceResources->Present();
 }
