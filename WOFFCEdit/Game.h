@@ -61,7 +61,10 @@ public:
 	void SetPickedObject(int id);
 	void AddPickedObject(int id);
 	void RemovePickedObject(int id);
-	void ExecuteCommand(std::shared_ptr<Command> command);
+	
+	template <typename T = Command, typename ...Args>
+	void ExecuteCommand(Args... args);
+	
 	void UndoCommand();
 	void RedoCommand();
 

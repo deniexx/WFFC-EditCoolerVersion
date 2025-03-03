@@ -535,8 +535,11 @@ void Game::SaveDisplayChunk(ChunkObject * SceneChunk)
 	m_displayChunk.SaveHeightMap();			//save heightmap to file.
 }
 
-void Game::ExecuteCommand(std::shared_ptr<Command> command)
+template<typename T, typename ...Args>
+void Game::ExecuteCommand(Args... args)
 {
+    std::shared_ptr<T> command = std::make_shared<T>(args...);
+
     command->Execute(this);
     m_undoStack.push_back(command);
     m_redoStack.clear();
@@ -786,18 +789,18 @@ void Game::HandleObjectPicking(int selected)
         // Unselect object if it is already in the array
         if (std::find(m_pickedObjects.begin(), m_pickedObjects.end(), selected) != m_pickedObjects.end())
         {
-            ExecuteCommand(std::make_shared<SelectionCommand>(selected, SelectionType::Remove));
+            ExecuteCommand<SelectionCommand>(selected, SelectionType::Remove);
         }
         else
         {
-            ExecuteCommand(std::make_shared<SelectionCommand>(selected, SelectionType::Add));
+            ExecuteCommand<SelectionCommand>(selected, SelectionType::Add);
         }
     }
     else
     {
         if (selected == -1)
         {
-            ExecuteCommand(std::make_shared<SelectionCommand>(selected, SelectionType::Clear));
+            ExecuteCommand<SelectionCommand>(selected, SelectionType::Clear);
             return;
         }
 
@@ -808,11 +811,11 @@ void Game::HandleObjectPicking(int selected)
 
         if (std::find(m_pickedObjects.begin(), m_pickedObjects.end(), selected) != m_pickedObjects.end())
         {
-            ExecuteCommand(std::make_shared<SelectionCommand>(selected, SelectionType::Remove));
+            ExecuteCommand<SelectionCommand>(selected, SelectionType::Remove);
         }
         else
         {
-            ExecuteCommand(std::make_shared<SelectionCommand>(selected, SelectionType::Set));
+            ExecuteCommand<SelectionCommand>(selected, SelectionType::Set);
         }
 
     }
