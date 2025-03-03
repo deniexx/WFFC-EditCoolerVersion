@@ -9,6 +9,7 @@ BEGIN_MESSAGE_MAP(MFCMain, CWinApp)
 	ON_COMMAND(ID_BUTTON40001,	&MFCMain::ToolBarButton1)
 	ON_COMMAND(ID_EDIT_UNDO, &MFCMain::UndoButton)
 	ON_COMMAND(ID_EDIT_REDO, &MFCMain::RedoButton)
+	ON_COMMAND(ID_EDIT_TRANSFORMTOOL, &MFCMain::TransformButton)
 	ON_UPDATE_COMMAND_UI(ID_INDICATOR_TOOL, &CMyFrame::OnUpdatePage)
 END_MESSAGE_MAP()
 
@@ -124,6 +125,12 @@ void MFCMain::UndoButton()
 void MFCMain::RedoButton()
 {
 	m_ToolSystem.onRedoButton();
+}
+
+void MFCMain::TransformButton()
+{
+	m_transformDialog.Create(IDD_TRANSFORM);
+	m_transformDialog.ShowWindow(SW_SHOW);
 }
 
 MFCMain::MFCMain()

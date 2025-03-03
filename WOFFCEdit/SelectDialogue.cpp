@@ -67,7 +67,6 @@ void SelectDialogue::Select()
 	m_listBox.GetText(index, currentSelectionValue);
 
 	*m_currentSelection = _ttoi(currentSelectionValue);
-
 }
 
 BOOL SelectDialogue::OnInitDialog()
