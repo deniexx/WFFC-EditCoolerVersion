@@ -33,6 +33,7 @@ const std::vector<int>& ToolMain::getCurrentSelectionIDs()
 
 void ToolMain::onActionInitialise(HWND handle, int width, int height)
 {
+	g_ToolMain = this;
 	//window size, handle etc for directX
 	m_width		= width;
 	m_height	= height;
@@ -296,6 +297,36 @@ void ToolMain::onRedoButton()
 	m_d3dRenderer.RedoCommand();
 }
 
+void ToolMain::TranslateSelected(float x, float y, float z)
+{
+	int objectIndex = m_d3dRenderer.GetPickedObjects()[m_d3dRenderer.GetPickedObjects().size() - 1];
+	m_sceneGraph[objectIndex].posX = x;
+	m_sceneGraph[objectIndex].posY = y;
+	m_sceneGraph[objectIndex].posZ = z;
+
+	m_d3dRenderer.BuildDisplayList(&m_sceneGraph);
+}
+
+void ToolMain::RotateSelected(float x, float y, float z)
+{
+	int objectIndex = m_d3dRenderer.GetPickedObjects()[m_d3dRenderer.GetPickedObjects().size() - 1];
+	m_sceneGraph[objectIndex].rotX = x;
+	m_sceneGraph[objectIndex].rotY = y;
+	m_sceneGraph[objectIndex].rotZ = z;
+
+	m_d3dRenderer.BuildDisplayList(&m_sceneGraph);
+}
+
+void ToolMain::ScaleSelected(float x, float y, float z)
+{
+	int objectIndex = m_d3dRenderer.GetPickedObjects()[m_d3dRenderer.GetPickedObjects().size() - 1];
+	m_sceneGraph[objectIndex].scaX = x;
+	m_sceneGraph[objectIndex].scaY = y;
+	m_sceneGraph[objectIndex].scaZ = z;
+
+	m_d3dRenderer.BuildDisplayList(&m_sceneGraph);
+}
+
 void ToolMain::Tick(MSG *msg)
 {
 	//do we have a selection
@@ -398,4 +429,9 @@ void ToolMain::UpdateInput(MSG * msg)
 		m_toolInputCommands.yDown = true;
 	}
 	else m_toolInputCommands.yDown = false;
+}
+
+SceneObject* ToolMain::GetSelectedObject()
+{
+	return &m_sceneGraph[m_d3dRenderer.GetPickedObjects()[m_d3dRenderer.GetPickedObjects().size() - 1]];
 }

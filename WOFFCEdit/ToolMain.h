@@ -11,6 +11,7 @@
 #include "vendor/imgui/backends/imgui_impl_dx11.h"
 #include <vector>
 
+static class ToolMain* g_ToolMain;
 
 class ToolMain
 {
@@ -29,8 +30,14 @@ public: //methods
 	afx_msg void onUndoButton();
 	afx_msg void onRedoButton();
 
+	void TranslateSelected(float x, float y, float z);
+	void RotateSelected(float x, float y, float z);
+	void ScaleSelected(float x, float y, float z);
+
 	void	Tick(MSG *msg);
 	void	UpdateInput(MSG *msg);
+
+	SceneObject* GetSelectedObject();
 
 public:	//variables
 	std::vector<SceneObject>    m_sceneGraph;	//our scenegraph storing all the objects in the current chunk

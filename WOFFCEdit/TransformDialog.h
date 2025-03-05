@@ -4,6 +4,8 @@
 #include "afxdialogex.h"
 #include "resource.h"
 
+class ToolMain;
+
 class TransformDialog : public CDialogEx
 {
 	DECLARE_DYNAMIC(TransformDialog)
@@ -15,21 +17,15 @@ public:
 
 	afx_msg void End();		//kill the dialogue
 
-	void SetObjectData(float PosX, float PosY, float PosZ, float RotX, float RotY, float RotZ, float ScaX, float ScaY, float ScaZ);
+	void SetObjectData(ToolMain* main, float PosX, float PosY, float PosZ, float RotX, float RotY, float RotZ, float ScaX, float ScaY, float ScaZ);
 
 #ifdef AFX_DESIGN_TIME
 	enum { IDD = IDD_TRANSFORM };
 #endif
 
-	afx_msg void TranslateX();
-	afx_msg void TranslateY();
-	afx_msg void TranslateZ();
-	afx_msg void RotateX();
-	afx_msg void RotateY();
-	afx_msg void RotateZ();
-	afx_msg void ScaleX();
-	afx_msg void ScaleY();
-	afx_msg void ScaleZ();
+	afx_msg void Translate();
+	afx_msg void Rotate();
+	afx_msg void Scale();
 
 	DECLARE_MESSAGE_MAP()
 
@@ -43,6 +39,7 @@ protected:
 
 private:
 
+	ToolMain* toolMain;
 	float posX, posY, posZ;
 	float rotX, rotY, rotZ;
 	float scaX, scaY, scaZ;

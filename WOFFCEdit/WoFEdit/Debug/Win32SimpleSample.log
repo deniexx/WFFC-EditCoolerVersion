@@ -2,4 +2,13 @@
   _WIN32_WINNT not defined. Defaulting to _WIN32_WINNT_MAXVER (see WinSDKVer.h)
 C:\GameDev\WFFC-EditCoolerVersion\WOFFCEdit\resource.h(27,9): warning C4005: 'ID_EDIT_UNDO': macro redefinition
 C:\GameDev\WFFC-EditCoolerVersion\WOFFCEdit\resource.h(28,9): warning C4005: 'ID_EDIT_REDO': macro redefinition
+C:\GameDev\WFFC-EditCoolerVersion\WOFFCEdit\TransformDialog.cpp(41,10): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
+C:\GameDev\WFFC-EditCoolerVersion\WOFFCEdit\TransformDialog.cpp(44,10): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
+C:\GameDev\WFFC-EditCoolerVersion\WOFFCEdit\TransformDialog.cpp(47,10): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
+C:\GameDev\WFFC-EditCoolerVersion\WOFFCEdit\TransformDialog.cpp(56,10): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
+C:\GameDev\WFFC-EditCoolerVersion\WOFFCEdit\TransformDialog.cpp(59,10): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
+C:\GameDev\WFFC-EditCoolerVersion\WOFFCEdit\TransformDialog.cpp(62,10): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
+C:\GameDev\WFFC-EditCoolerVersion\WOFFCEdit\TransformDialog.cpp(71,10): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
+C:\GameDev\WFFC-EditCoolerVersion\WOFFCEdit\TransformDialog.cpp(74,10): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
+C:\GameDev\WFFC-EditCoolerVersion\WOFFCEdit\TransformDialog.cpp(77,10): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
   Win32SimpleSample.vcxproj -> C:\GameDev\WFFC-EditCoolerVersion\WOFFCEdit\Debug\WoFEdit.exe

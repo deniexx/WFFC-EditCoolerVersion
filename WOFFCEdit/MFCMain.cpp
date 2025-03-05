@@ -131,6 +131,9 @@ void MFCMain::TransformButton()
 {
 	m_transformDialog.Create(IDD_TRANSFORM);
 	m_transformDialog.ShowWindow(SW_SHOW);
+
+	SceneObject* sceneObject = m_ToolSystem.GetSelectedObject();
+	m_transformDialog.SetObjectData(m_ToolSystem, )
 }
 
 MFCMain::MFCMain()
