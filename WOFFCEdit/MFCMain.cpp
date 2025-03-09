@@ -129,11 +129,18 @@ void MFCMain::RedoButton()
 
 void MFCMain::TransformButton()
 {
+	if (m_ToolSystem.getCurrentSelectionIDs().size() == 0)
+	{
+		return;
+	}
+	
 	m_transformDialog.Create(IDD_TRANSFORM);
 	m_transformDialog.ShowWindow(SW_SHOW);
 
 	SceneObject* sceneObject = m_ToolSystem.GetSelectedObject();
-	m_transformDialog.SetObjectData(m_ToolSystem, )
+	m_transformDialog.SetObjectData(&m_ToolSystem, sceneObject->posX, sceneObject->posY, sceneObject->posZ,
+									sceneObject->rotX, sceneObject->rotY, sceneObject->rotZ, 
+									sceneObject->scaX, sceneObject->scaY, sceneObject->scaZ);
 }
 
 MFCMain::MFCMain()

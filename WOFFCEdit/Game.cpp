@@ -19,6 +19,7 @@ using namespace DirectX::SimpleMath;
 using Microsoft::WRL::ComPtr;
 
 #include "SelectionCommand.h"
+#include "TransformCommand.h"
 
 Game::Game()
 
@@ -49,7 +50,7 @@ Game::~Game()
 }
 
 // Initialize the Direct3D resources required to run.
-void Game::Initialize(HWND window, int width, int height)
+void Game::Initialize(ToolMain* toolMain, HWND window, int width, int height)
 {
     m_gamePad = std::make_unique<GamePad>();
 
@@ -59,6 +60,8 @@ void Game::Initialize(HWND window, int width, int height)
     m_mouse->SetWindow(window);
 
     m_deviceResources->SetWindow(window, width, height);
+
+    m_toolMain = toolMain;
 
     m_hwnd = window;
     m_cursor = LoadCursor(NULL, IDC_ARROW);
@@ -192,7 +195,7 @@ void Game::Update(DX::StepTimer const& timer)
     }
 
     bool wasLMBReleased = m_lmbDownLastFrame == true && mouseState.leftButton == false;
-    if (wasLMBReleased && !ImGui::IsAnyItemHovered())
+    if (wasLMBReleased && !ImGui::IsAnyItemHovered() && !m_dialogHovered)
     {
         int selected = PickObjectUnderMouse();
         HandleObjectPicking(selected);
@@ -535,11 +538,23 @@ void Game::SaveDisplayChunk(ChunkObject * SceneChunk)
 	m_displayChunk.SaveHeightMap();			//save heightmap to file.
 }
 
-template<typename T, typename ...Args>
-void Game::ExecuteCommand(Args... args)
-{
-    std::shared_ptr<T> command = std::make_shared<T>(args...);
+//template<typename T, typename ...Args>
+//void Game::ExecuteCommand(Args... args)
+//{
+//    std::shared_ptr<T> command = std::make_shared<T>(args...);
+//
+//    command->Execute(this);
+//    m_undoStack.push_back(command);
+//    m_redoStack.clear();
+//
+//    if (m_undoStack.size() > 30)
+//    {
+//        m_undoStack.erase(m_undoStack.begin());
+//    }
+//}
 
+void Game::ExecuteCommand(std::shared_ptr<Command> command)
+{
     command->Execute(this);
     m_undoStack.push_back(command);
     m_redoStack.clear();
@@ -789,18 +804,21 @@ void Game::HandleObjectPicking(int selected)
         // Unselect object if it is already in the array
         if (std::find(m_pickedObjects.begin(), m_pickedObjects.end(), selected) != m_pickedObjects.end())
         {
-            ExecuteCommand<SelectionCommand>(selected, SelectionType::Remove);
+            std::shared_ptr<SelectionCommand> command = std::make_shared<SelectionCommand>(selected, SelectionType::Remove);
+            ExecuteCommand(command);
         }
         else
         {
-            ExecuteCommand<SelectionCommand>(selected, SelectionType::Add);
+            std::shared_ptr<SelectionCommand> command = std::make_shared<SelectionCommand>(selected, SelectionType::Add);
+            ExecuteCommand(command);
         }
     }
     else
     {
         if (selected == -1)
         {
-            ExecuteCommand<SelectionCommand>(selected, SelectionType::Clear);
+            std::shared_ptr<SelectionCommand> command = std::make_shared<SelectionCommand>(selected, SelectionType::Clear);
+            ExecuteCommand(command);
             return;
         }
 
@@ -811,11 +829,13 @@ void Game::HandleObjectPicking(int selected)
 
         if (std::find(m_pickedObjects.begin(), m_pickedObjects.end(), selected) != m_pickedObjects.end())
         {
-            ExecuteCommand<SelectionCommand>(selected, SelectionType::Remove);
+            std::shared_ptr<SelectionCommand> command = std::make_shared<SelectionCommand>(selected, SelectionType::Remove);
+            ExecuteCommand(command);
         }
         else
         {
-            ExecuteCommand<SelectionCommand>(selected, SelectionType::Set);
+            std::shared_ptr<SelectionCommand> command = std::make_shared<SelectionCommand>(selected, SelectionType::Set);
+            ExecuteCommand(command);
         }
 
     }
@@ -841,6 +861,14 @@ void Game::OnDeviceRestored()
     CreateDeviceDependentResources();
 
     CreateWindowSizeDependentResources();
+}
+void Game::OnDialogHovered()
+{
+    m_dialogHovered = true;
+}
+void Game::OnDialogMouseLeave()
+{
+    m_dialogHovered = false;
 }
 #pragma endregion
 

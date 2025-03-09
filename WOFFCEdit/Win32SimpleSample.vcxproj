@@ -181,6 +181,7 @@
     <ClCompile Include="SelectionCommand.cpp" />
     <ClCompile Include="sqlite3.c" />
     <ClCompile Include="ToolMain.cpp" />
+    <ClCompile Include="TransformCommand.cpp" />
     <ClCompile Include="TransformDialog.cpp" />
     <ClCompile Include="vendor\imgui\backends\imgui_impl_dx11.cpp" />
     <ClCompile Include="vendor\imgui\backends\imgui_impl_win32.cpp" />
@@ -212,6 +213,7 @@
     <ClInclude Include="StepTimer.h" />
     <ClInclude Include="MFCMain.h" />
     <ClInclude Include="ToolMain.h" />
+    <ClInclude Include="TransformCommand.h" />
     <ClInclude Include="TransformDialog.h" />
     <ClInclude Include="vendor\imgui\backends\imgui_impl_dx11.h" />
     <ClInclude Include="vendor\imgui\backends\imgui_impl_win32.h" />

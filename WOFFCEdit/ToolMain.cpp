@@ -1,7 +1,12 @@
 #include "ToolMain.h"
+
 #include "resource.h"
 #include <vector>
 #include <sstream>
+#include "TransformCommand.h"
+#include "vendor/imgui/imgui.h"
+#include "vendor/imgui/backends/imgui_impl_dx11.h"
+#include "vendor/imgui/backends/imgui_impl_win32.h"
 
 //
 //ToolMain Class
@@ -38,7 +43,7 @@ void ToolMain::onActionInitialise(HWND handle, int width, int height)
 	m_width		= width;
 	m_height	= height;
 	
-	m_d3dRenderer.Initialize(handle, m_width, m_height);
+	m_d3dRenderer.Initialize(this, handle, m_width, m_height);
 
 	//database connection establish
 	int rc;
@@ -300,29 +305,81 @@ void ToolMain::onRedoButton()
 void ToolMain::TranslateSelected(float x, float y, float z)
 {
 	int objectIndex = m_d3dRenderer.GetPickedObjects()[m_d3dRenderer.GetPickedObjects().size() - 1];
-	m_sceneGraph[objectIndex].posX = x;
-	m_sceneGraph[objectIndex].posY = y;
-	m_sceneGraph[objectIndex].posZ = z;
+	Vector3 pos(x, y, z);
+	Vector3 rot(m_sceneGraph[objectIndex].rotX, m_sceneGraph[objectIndex].rotY, m_sceneGraph[objectIndex].rotZ);
+	Vector3 sca(m_sceneGraph[objectIndex].scaX, m_sceneGraph[objectIndex].scaY, m_sceneGraph[objectIndex].scaZ);
 
-	m_d3dRenderer.BuildDisplayList(&m_sceneGraph);
+	Vector3 oldPos(m_sceneGraph[objectIndex].posX, m_sceneGraph[objectIndex].posY, m_sceneGraph[objectIndex].posZ);
+	
+	std::shared_ptr<TransformCommand> command = std::make_shared<TransformCommand>(pos, rot, sca, oldPos, rot, sca,
+		[=](Vector3 pos, Vector3 rot, Vector3 sca)
+		{
+			SetTransformOnSelected(pos, rot ,sca);
+		}
+	);
+	m_d3dRenderer.ExecuteCommand(command);
 }
 
 void ToolMain::RotateSelected(float x, float y, float z)
 {
 	int objectIndex = m_d3dRenderer.GetPickedObjects()[m_d3dRenderer.GetPickedObjects().size() - 1];
-	m_sceneGraph[objectIndex].rotX = x;
-	m_sceneGraph[objectIndex].rotY = y;
-	m_sceneGraph[objectIndex].rotZ = z;
 
-	m_d3dRenderer.BuildDisplayList(&m_sceneGraph);
+	Vector3 pos(m_sceneGraph[objectIndex].posX, m_sceneGraph[objectIndex].posY, m_sceneGraph[objectIndex].posZ);
+	Vector3 rot(x, y, z);
+	Vector3 sca(m_sceneGraph[objectIndex].scaX, m_sceneGraph[objectIndex].scaY, m_sceneGraph[objectIndex].scaZ);
+
+	Vector3 oldRot(m_sceneGraph[objectIndex].rotX, m_sceneGraph[objectIndex].rotY, m_sceneGraph[objectIndex].rotZ);
+	
+	std::shared_ptr<TransformCommand> command = std::make_shared<TransformCommand>(pos, rot, sca, pos, oldRot, sca,
+		[=](Vector3 pos, Vector3 rot, Vector3 sca)
+		{
+			SetTransformOnSelected(pos, rot ,sca);
+		}
+	);
+	m_d3dRenderer.ExecuteCommand(command);
 }
 
 void ToolMain::ScaleSelected(float x, float y, float z)
 {
 	int objectIndex = m_d3dRenderer.GetPickedObjects()[m_d3dRenderer.GetPickedObjects().size() - 1];
-	m_sceneGraph[objectIndex].scaX = x;
-	m_sceneGraph[objectIndex].scaY = y;
-	m_sceneGraph[objectIndex].scaZ = z;
+	Vector3 pos(m_sceneGraph[objectIndex].posX, m_sceneGraph[objectIndex].posY, m_sceneGraph[objectIndex].posZ);
+	Vector3 rot(m_sceneGraph[objectIndex].rotX, m_sceneGraph[objectIndex].rotY, m_sceneGraph[objectIndex].rotZ);
+	Vector3 sca(x, y, z);
+
+	Vector3 oldSca(m_sceneGraph[objectIndex].scaX, m_sceneGraph[objectIndex].scaY, m_sceneGraph[objectIndex].scaZ);
+	
+	std::shared_ptr<TransformCommand> command = std::make_shared<TransformCommand>(pos, rot, sca, pos, rot, oldSca,
+		[=](Vector3 pos, Vector3 rot, Vector3 sca)
+		{
+			SetTransformOnSelected(pos, rot ,sca);
+		}
+	);
+	
+	m_d3dRenderer.ExecuteCommand(command);
+}
+
+void ToolMain::OnDialogHovered()
+{
+	m_d3dRenderer.OnDialogHovered();
+}
+
+void ToolMain::OnDialogMouseLeave()
+{
+	m_d3dRenderer.OnDialogMouseLeave();
+}
+
+void ToolMain::SetTransformOnSelected(Vector3 pos, Vector3 rot, Vector3 sca)
+{
+	int objectIndex = m_d3dRenderer.GetPickedObjects()[m_d3dRenderer.GetPickedObjects().size() - 1];
+	m_sceneGraph[objectIndex].posX = pos.x;
+	m_sceneGraph[objectIndex].posY = pos.y;
+	m_sceneGraph[objectIndex].posZ = pos.z;
+	m_sceneGraph[objectIndex].rotX = rot.x;
+	m_sceneGraph[objectIndex].rotY = rot.y;
+	m_sceneGraph[objectIndex].rotZ = rot.z;
+	m_sceneGraph[objectIndex].scaX = sca.x;
+	m_sceneGraph[objectIndex].scaY = sca.y;
+	m_sceneGraph[objectIndex].scaZ = sca.z;
 
 	m_d3dRenderer.BuildDisplayList(&m_sceneGraph);
 }

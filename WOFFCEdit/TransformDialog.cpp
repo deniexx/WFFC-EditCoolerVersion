@@ -1,6 +1,5 @@
 #include "stdafx.h"
 #include <string>
-#include "pch.h"
 #include "ToolMain.h"
 #include "TransformDialog.h"
 
@@ -31,11 +30,18 @@ TransformDialog::~TransformDialog()
 
 void TransformDialog::End()
 {
+	m_toolMain->OnDialogMouseLeave();
 	DestroyWindow();
 }
 
 void TransformDialog::Translate()
 {
+	if (numberOfChanges < 9)
+	{
+		numberOfChanges++;
+		return;
+	}
+	
 	CString tranString;
 	transX.GetWindowText(tranString);
 	float x = _ttof(tranString);
@@ -46,11 +52,17 @@ void TransformDialog::Translate()
 	transZ.GetWindowText(tranString);
 	float z = _ttof(tranString);
 
-	toolMain->TranslateSelected(x, y, z);
+	m_toolMain->TranslateSelected(x, y, z);
 }
 
 void TransformDialog::Rotate()
 {
+	if (numberOfChanges < 9)
+	{
+		numberOfChanges++;
+		return;
+	}
+	
 	CString tranString;
 	rotaX.GetWindowText(tranString);
 	float x = _ttof(tranString);
@@ -61,11 +73,17 @@ void TransformDialog::Rotate()
 	rotaZ.GetWindowText(tranString);
 	float z = _ttof(tranString);
 
-	toolMain->RotateSelected(x, y, z);
+	m_toolMain->RotateSelected(x, y, z);
 }
 
 void TransformDialog::Scale()
 {
+	if (numberOfChanges < 9)
+	{
+		numberOfChanges++;
+		return;
+	}
+	
 	CString tranString;
 	scalX.GetWindowText(tranString);
 	float x = _ttof(tranString);
@@ -76,7 +94,7 @@ void TransformDialog::Scale()
 	scalZ.GetWindowText(tranString);
 	float z = _ttof(tranString);
 
-	toolMain->ScaleSelected(x, y, z);
+	m_toolMain->ScaleSelected(x, y, z);
 }
 
 void TransformDialog::DoDataExchange(CDataExchange* pDX)
@@ -94,9 +112,10 @@ void TransformDialog::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_SCALE_Z, scalZ);
 }
 
-void TransformDialog::SetObjectData(ToolMain* main, float PosX, float PosY, float PosZ, float RotX, float RotY, float RotZ, float ScaX, float ScaY, float ScaZ)
+void TransformDialog::SetObjectData(ToolMain* toolMain, float PosX, float PosY, float PosZ, float RotX, float RotY, float RotZ, float ScaX, float ScaY, float ScaZ)
 {
-	toolMain = main;
+	m_toolMain = toolMain;
+	m_toolMain->OnDialogHovered();
 
 	posX = PosX;
 	posY = PosY;
@@ -104,17 +123,17 @@ void TransformDialog::SetObjectData(ToolMain* main, float PosX, float PosY, floa
 	rotX = RotX;
 	rotY = RotY;
 	rotZ = RotZ;
-	scaZ = ScaX;
-	scaZ = ScaY;
+	scaX = ScaX;
+	scaY = ScaY;
 	scaZ = ScaZ;
 
 	transX.SetWindowText(std::to_wstring(posX).c_str());
-	transY.SetWindowText(std::to_wstring(posX).c_str());
-	transZ.SetWindowText(std::to_wstring(posX).c_str());
-	rotaX.SetWindowText(std::to_wstring(posX).c_str());
-	rotaY.SetWindowText(std::to_wstring(posX).c_str());
-	rotaZ.SetWindowText(std::to_wstring(posX).c_str());
-	scalX.SetWindowText(std::to_wstring(posX).c_str());
-	scalY.SetWindowText(std::to_wstring(posX).c_str());
-	scalZ.SetWindowText(std::to_wstring(posX).c_str());
+	transY.SetWindowText(std::to_wstring(posY).c_str());
+	transZ.SetWindowText(std::to_wstring(posZ).c_str());
+	rotaX.SetWindowText(std::to_wstring(rotX).c_str());
+	rotaY.SetWindowText(std::to_wstring(rotY).c_str());
+	rotaZ.SetWindowText(std::to_wstring(rotZ).c_str());
+	scalX.SetWindowText(std::to_wstring(scaX).c_str());
+	scalY.SetWindowText(std::to_wstring(scaY).c_str());
+	scalZ.SetWindowText(std::to_wstring(scaZ).c_str());
 }

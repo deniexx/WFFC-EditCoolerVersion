@@ -93,7 +93,12 @@
     <ClCompile Include="SelectionCommand.cpp">
       <Filter>Command</Filter>
     </ClCompile>
-    <ClCompile Include="TransformDialog.cpp" />
+    <ClCompile Include="TransformCommand.cpp">
+      <Filter>Command</Filter>
+    </ClCompile>
+    <ClCompile Include="TransformDialog.cpp">
+      <Filter>MFC</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="DeviceResources.h">
@@ -171,7 +176,12 @@
     <ClInclude Include="SelectionCommand.h">
       <Filter>Command</Filter>
     </ClInclude>
-    <ClInclude Include="TransformDialog.h" />
+    <ClInclude Include="TransformCommand.h">
+      <Filter>Command</Filter>
+    </ClInclude>
+    <ClInclude Include="TransformDialog.h">
+      <Filter>MFC</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

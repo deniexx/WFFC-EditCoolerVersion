@@ -16,6 +16,7 @@
 #include "Camera.h"
 
 class Command;
+class ToolMain;
 
 // A basic game implementation that creates a D3D11 device and
 // provides a game loop.
@@ -27,7 +28,7 @@ public:
 	~Game();
 
 	// Initialization and management
-	void Initialize(HWND window, int width, int height);
+	void Initialize(ToolMain* toolMain, HWND window, int width, int height);
 	void SetGridState(bool state);
 
 	// Basic game loop
@@ -42,6 +43,9 @@ public:
 	// IDeviceNotify
 	virtual void OnDeviceLost() override;
 	virtual void OnDeviceRestored() override;
+
+	void OnDialogHovered();
+	void OnDialogMouseLeave();
 
 	// Messages
 	void OnActivated();
@@ -62,8 +66,8 @@ public:
 	void AddPickedObject(int id);
 	void RemovePickedObject(int id);
 	
-	template <typename T = Command, typename ...Args>
-	void ExecuteCommand(Args... args);
+	//template <typename T = Command, typename ...Args>
+	void ExecuteCommand(std::shared_ptr<Command> command);
 	
 	void UndoCommand();
 	void RedoCommand();
@@ -148,6 +152,9 @@ private:
 	bool m_wasYDown = false;
 	bool m_zReleased = false;
 	bool m_yReleased = false;
+	bool m_dialogHovered = false;
+
+	ToolMain* m_toolMain;
 
 #ifdef DXTK_AUDIO
     uint32_t                                                                m_audioEvent;

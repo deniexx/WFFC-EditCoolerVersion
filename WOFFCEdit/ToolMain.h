@@ -6,11 +6,9 @@
 #include "sqlite3.h"
 #include "SceneObject.h"
 #include "InputCommands.h"
-#include "vendor/imgui/imgui.h"
-#include "vendor/imgui/backends/imgui_impl_win32.h"
-#include "vendor/imgui/backends/imgui_impl_dx11.h"
 #include <vector>
 
+using namespace DirectX::SimpleMath;
 static class ToolMain* g_ToolMain;
 
 class ToolMain
@@ -34,6 +32,11 @@ public: //methods
 	void RotateSelected(float x, float y, float z);
 	void ScaleSelected(float x, float y, float z);
 
+	void UpdateTransformDialog();
+	void OnDialogHovered();
+	void OnDialogMouseLeave();
+	void SetTransformOnSelected(Vector3 pos, Vector3 rot, Vector3 sca);
+
 	void	Tick(MSG *msg);
 	void	UpdateInput(MSG *msg);
 
@@ -55,7 +58,7 @@ private:	//variables
 	CRect	WindowRECT;		//Window area rectangle. 
 	char	m_keyArray[256];
 	sqlite3 *m_databaseConnection;	//sqldatabase handle
-
+	
 	int m_width;		//dimensions passed to directX
 	int m_height;
 	int m_currentChunk;			//the current chunk of thedatabase that we are operating on.  Dictates loading and saving. 

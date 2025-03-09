@@ -2,6 +2,7 @@
 
 #include "afxwin.h"
 #include "afxdialogex.h"
+#include "pch.h"
 #include "resource.h"
 
 class ToolMain;
@@ -17,7 +18,7 @@ public:
 
 	afx_msg void End();		//kill the dialogue
 
-	void SetObjectData(ToolMain* main, float PosX, float PosY, float PosZ, float RotX, float RotY, float RotZ, float ScaX, float ScaY, float ScaZ);
+	void SetObjectData(ToolMain* toolMain, float PosX, float PosY, float PosZ, float RotX, float RotY, float RotZ, float ScaX, float ScaY, float ScaZ);
 
 #ifdef AFX_DESIGN_TIME
 	enum { IDD = IDD_TRANSFORM };
@@ -39,10 +40,13 @@ protected:
 
 private:
 
-	ToolMain* toolMain;
+	int numberOfChanges = 0;
+
 	float posX, posY, posZ;
 	float rotX, rotY, rotZ;
 	float scaX, scaY, scaZ;
+
+	ToolMain* m_toolMain;
 };
 
 INT_PTR CALLBACK SelectProc(HWND   hwndDlg, UINT   uMsg, WPARAM wParam, LPARAM lParam);
