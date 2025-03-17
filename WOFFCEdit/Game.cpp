@@ -19,7 +19,6 @@ using namespace DirectX::SimpleMath;
 using Microsoft::WRL::ComPtr;
 
 #include "SelectionCommand.h"
-#include "TransformCommand.h"
 
 Game::Game()
 
@@ -50,7 +49,7 @@ Game::~Game()
 }
 
 // Initialize the Direct3D resources required to run.
-void Game::Initialize(ToolMain* toolMain, HWND window, int width, int height)
+void Game::Initialize(HWND window, int width, int height)
 {
     m_gamePad = std::make_unique<GamePad>();
 
@@ -60,8 +59,6 @@ void Game::Initialize(ToolMain* toolMain, HWND window, int width, int height)
     m_mouse->SetWindow(window);
 
     m_deviceResources->SetWindow(window, width, height);
-
-    m_toolMain = toolMain;
 
     m_hwnd = window;
     m_cursor = LoadCursor(NULL, IDC_ARROW);
@@ -535,7 +532,7 @@ void Game::BuildDisplayChunk(ChunkObject * SceneChunk)
 
 void Game::SaveDisplayChunk(ChunkObject * SceneChunk)
 {
-	m_displayChunk.SaveHeightMap();			//save heightmap to file.
+	m_displayChunk.SaveHeightMap();			//save map to file.
 }
 
 //template<typename T, typename ...Args>
@@ -862,11 +859,11 @@ void Game::OnDeviceRestored()
 
     CreateWindowSizeDependentResources();
 }
-void Game::OnDialogHovered()
+void Game::OnDialogOpened()
 {
     m_dialogHovered = true;
 }
-void Game::OnDialogMouseLeave()
+void Game::OnDialogClosed()
 {
     m_dialogHovered = false;
 }

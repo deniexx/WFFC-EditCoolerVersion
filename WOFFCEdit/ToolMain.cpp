@@ -30,7 +30,6 @@ ToolMain::~ToolMain()
 	sqlite3_close(m_databaseConnection);		//close the database connection
 }
 
-
 const std::vector<int>& ToolMain::getCurrentSelectionIDs()
 {
 	return m_d3dRenderer.GetPickedObjects();
@@ -43,7 +42,7 @@ void ToolMain::onActionInitialise(HWND handle, int width, int height)
 	m_width		= width;
 	m_height	= height;
 	
-	m_d3dRenderer.Initialize(this, handle, m_width, m_height);
+	m_d3dRenderer.Initialize(handle, m_width, m_height);
 
 	//database connection establish
 	int rc;
@@ -195,7 +194,6 @@ void ToolMain::onActionLoad()
 	m_d3dRenderer.BuildDisplayList(&m_sceneGraph);
 	//build the renderable chunk 
 	m_d3dRenderer.BuildDisplayChunk(&m_chunk);
-
 }
 
 void ToolMain::onActionSave()
@@ -360,12 +358,12 @@ void ToolMain::ScaleSelected(float x, float y, float z)
 
 void ToolMain::OnDialogHovered()
 {
-	m_d3dRenderer.OnDialogHovered();
+	m_d3dRenderer.OnDialogOpened();
 }
 
 void ToolMain::OnDialogMouseLeave()
 {
-	m_d3dRenderer.OnDialogMouseLeave();
+	m_d3dRenderer.OnDialogClosed();
 }
 
 void ToolMain::SetTransformOnSelected(Vector3 pos, Vector3 rot, Vector3 sca)
