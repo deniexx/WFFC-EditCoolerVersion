@@ -1,34 +1,137 @@
-﻿  ToolMain.cpp
+﻿  Camera.cpp
+C:\Users\2202790\source\WFFC-EditCoolerVersion\WOFFCEdit\Camera.cpp(82,14): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
+C:\Users\2202790\source\WFFC-EditCoolerVersion\WOFFCEdit\Camera.cpp(83,12): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
+  DisplayChunk.cpp
+C:\Users\2202790\source\WFFC-EditCoolerVersion\WOFFCEdit\DisplayChunk.cpp(14,27): warning C4305: '=': truncation from 'double' to 'float'
+C:\Users\2202790\source\WFFC-EditCoolerVersion\WOFFCEdit\DisplayChunk.cpp(15,49): warning C4244: '=': conversion from 'int' to 'float', possible loss of data
+C:\Users\2202790\source\WFFC-EditCoolerVersion\WOFFCEdit\DisplayChunk.cpp(74,185): warning C4244: 'argument': conversion from 'double' to 'float', possible loss of data
+C:\Users\2202790\source\WFFC-EditCoolerVersion\WOFFCEdit\DisplayChunk.cpp(74,81): warning C4244: 'argument': conversion from 'double' to 'float', possible loss of data
+C:\Users\2202790\source\WFFC-EditCoolerVersion\WOFFCEdit\DisplayChunk.cpp(94,10): warning C4996: 'fopen': This function or variable may be unsafe. Consider using fopen_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+C:\Users\2202790\source\WFFC-EditCoolerVersion\WOFFCEdit\DisplayChunk.cpp(152,10): warning C4996: 'fopen': This function or variable may be unsafe. Consider using fopen_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+C:\Users\2202790\source\WFFC-EditCoolerVersion\WOFFCEdit\DisplayChunk.cpp(189,30): warning C4101: 'index4': unreferenced local variable
+C:\Users\2202790\source\WFFC-EditCoolerVersion\WOFFCEdit\DisplayChunk.cpp(189,14): warning C4101: 'index2': unreferenced local variable
+C:\Users\2202790\source\WFFC-EditCoolerVersion\WOFFCEdit\DisplayChunk.cpp(189,22): warning C4101: 'index3': unreferenced local variable
+C:\Users\2202790\source\WFFC-EditCoolerVersion\WOFFCEdit\DisplayChunk.cpp(189,6): warning C4101: 'index1': unreferenced local variable
+  Game.cpp
+C:\Users\2202790\source\WFFC-EditCoolerVersion\WOFFCEdit\Game.cpp(147,35): warning C4244: 'argument': conversion from 'float' to 'int', possible loss of data
+C:\Users\2202790\source\WFFC-EditCoolerVersion\WOFFCEdit\Game.cpp(147,26): warning C4244: 'argument': conversion from 'float' to 'int', possible loss of data
+C:\Users\2202790\source\WFFC-EditCoolerVersion\WOFFCEdit\Game.cpp(159,31): warning C4244: 'argument': conversion from 'float' to 'int', possible loss of data
+C:\Users\2202790\source\WFFC-EditCoolerVersion\WOFFCEdit\Game.cpp(159,22): warning C4244: 'argument': conversion from 'float' to 'int', possible loss of data
+C:\Users\2202790\source\WFFC-EditCoolerVersion\WOFFCEdit\Game.cpp(210,51): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
+C:\Users\2202790\source\WFFC-EditCoolerVersion\WOFFCEdit\Game.cpp(210,37): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
+C:\Users\2202790\source\WFFC-EditCoolerVersion\WOFFCEdit\Game.cpp(296,57): warning C4244: 'argument': conversion from 'double' to 'float', possible loss of data
+C:\Users\2202790\source\WFFC-EditCoolerVersion\WOFFCEdit\Game.cpp(295,57): warning C4244: 'argument': conversion from 'double' to 'float', possible loss of data
+C:\Users\2202790\source\WFFC-EditCoolerVersion\WOFFCEdit\Game.cpp(294,97): warning C4244: 'argument': conversion from 'double' to 'float', possible loss of data
+C:\Users\2202790\source\WFFC-EditCoolerVersion\WOFFCEdit\Game.cpp(730,59): warning C4244: 'argument': conversion from 'const int' to 'float', possible loss of data
+C:\Users\2202790\source\WFFC-EditCoolerVersion\WOFFCEdit\Game.cpp(730,50): warning C4244: 'argument': conversion from 'const int' to 'float', possible loss of data
+C:\Users\2202790\source\WFFC-EditCoolerVersion\WOFFCEdit\Game.cpp(731,58): warning C4244: 'argument': conversion from 'const int' to 'float', possible loss of data
+C:\Users\2202790\source\WFFC-EditCoolerVersion\WOFFCEdit\Game.cpp(731,49): warning C4244: 'argument': conversion from 'const int' to 'float', possible loss of data
+C:\Users\2202790\source\WFFC-EditCoolerVersion\WOFFCEdit\Game.cpp(733,23): warning C4018: '<': signed/unsigned mismatch
+C:\Users\2202790\source\WFFC-EditCoolerVersion\WOFFCEdit\Game.cpp(751,55): warning C4244: 'argument': conversion from 'double' to 'float', possible loss of data
+C:\Users\2202790\source\WFFC-EditCoolerVersion\WOFFCEdit\Game.cpp(750,55): warning C4244: 'argument': conversion from 'double' to 'float', possible loss of data
+C:\Users\2202790\source\WFFC-EditCoolerVersion\WOFFCEdit\Game.cpp(749,55): warning C4244: 'argument': conversion from 'double' to 'float', possible loss of data
+C:\Users\2202790\source\WFFC-EditCoolerVersion\WOFFCEdit\Game.cpp(760,73): warning C4244: 'argument': conversion from 'const LONG' to 'float', possible loss of data
+C:\Users\2202790\source\WFFC-EditCoolerVersion\WOFFCEdit\Game.cpp(760,50): warning C4244: 'argument': conversion from 'const LONG' to 'float', possible loss of data
+C:\Users\2202790\source\WFFC-EditCoolerVersion\WOFFCEdit\Game.cpp(767,72): warning C4244: 'argument': conversion from 'const LONG' to 'float', possible loss of data
+C:\Users\2202790\source\WFFC-EditCoolerVersion\WOFFCEdit\Game.cpp(767,49): warning C4244: 'argument': conversion from 'const LONG' to 'float', possible loss of data
+C:\Users\2202790\source\WFFC-EditCoolerVersion\WOFFCEdit\Game.cpp(775,27): warning C4018: '<': signed/unsigned mismatch
+C:\Users\2202790\source\WFFC-EditCoolerVersion\WOFFCEdit\Game.cpp(931,31): warning C4018: '<': signed/unsigned mismatch
+  Main.cpp
   _WIN32_WINNT not defined. Defaulting to _WIN32_WINNT_MAXVER (see WinSDKVer.h)
-C:\GameDev\WFFC-EditCoolerVersion\WOFFCEdit\resource.h(27,9): warning C4005: 'ID_EDIT_UNDO': macro redefinition
-C:\GameDev\WFFC-EditCoolerVersion\WOFFCEdit\resource.h(28,9): warning C4005: 'ID_EDIT_REDO': macro redefinition
-C:\GameDev\WFFC-EditCoolerVersion\WOFFCEdit\ToolMain.cpp(105,46): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
-C:\GameDev\WFFC-EditCoolerVersion\WOFFCEdit\ToolMain.cpp(106,46): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
-C:\GameDev\WFFC-EditCoolerVersion\WOFFCEdit\ToolMain.cpp(107,46): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
-C:\GameDev\WFFC-EditCoolerVersion\WOFFCEdit\ToolMain.cpp(108,46): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
-C:\GameDev\WFFC-EditCoolerVersion\WOFFCEdit\ToolMain.cpp(109,46): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
-C:\GameDev\WFFC-EditCoolerVersion\WOFFCEdit\ToolMain.cpp(110,46): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
-C:\GameDev\WFFC-EditCoolerVersion\WOFFCEdit\ToolMain.cpp(111,46): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
-C:\GameDev\WFFC-EditCoolerVersion\WOFFCEdit\ToolMain.cpp(112,46): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
-C:\GameDev\WFFC-EditCoolerVersion\WOFFCEdit\ToolMain.cpp(113,46): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
-C:\GameDev\WFFC-EditCoolerVersion\WOFFCEdit\ToolMain.cpp(125,48): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
-C:\GameDev\WFFC-EditCoolerVersion\WOFFCEdit\ToolMain.cpp(126,48): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
-C:\GameDev\WFFC-EditCoolerVersion\WOFFCEdit\ToolMain.cpp(127,48): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
-C:\GameDev\WFFC-EditCoolerVersion\WOFFCEdit\ToolMain.cpp(131,48): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
-C:\GameDev\WFFC-EditCoolerVersion\WOFFCEdit\ToolMain.cpp(132,47): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
-C:\GameDev\WFFC-EditCoolerVersion\WOFFCEdit\ToolMain.cpp(133,42): warning C4244: '=': conversion from 'int' to 'float', possible loss of data
-C:\GameDev\WFFC-EditCoolerVersion\WOFFCEdit\ToolMain.cpp(137,50): warning C4244: '=': conversion from 'double' to 'int', possible loss of data
-C:\GameDev\WFFC-EditCoolerVersion\WOFFCEdit\ToolMain.cpp(138,50): warning C4244: '=': conversion from 'double' to 'int', possible loss of data
-C:\GameDev\WFFC-EditCoolerVersion\WOFFCEdit\ToolMain.cpp(148,57): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
-C:\GameDev\WFFC-EditCoolerVersion\WOFFCEdit\ToolMain.cpp(149,57): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
-C:\GameDev\WFFC-EditCoolerVersion\WOFFCEdit\ToolMain.cpp(150,57): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
-C:\GameDev\WFFC-EditCoolerVersion\WOFFCEdit\ToolMain.cpp(151,58): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
-C:\GameDev\WFFC-EditCoolerVersion\WOFFCEdit\ToolMain.cpp(152,58): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
-C:\GameDev\WFFC-EditCoolerVersion\WOFFCEdit\ToolMain.cpp(153,58): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
-C:\GameDev\WFFC-EditCoolerVersion\WOFFCEdit\ToolMain.cpp(154,59): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
-C:\GameDev\WFFC-EditCoolerVersion\WOFFCEdit\ToolMain.cpp(155,56): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
-C:\GameDev\WFFC-EditCoolerVersion\WOFFCEdit\ToolMain.cpp(156,54): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
-C:\GameDev\WFFC-EditCoolerVersion\WOFFCEdit\ToolMain.cpp(157,57): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
-  TransformCommand.cpp
+C:\Users\2202790\source\WFFC-EditCoolerVersion\WOFFCEdit\resource.h(27,9): warning C4005: 'ID_EDIT_UNDO': macro redefinition
+  (compiling source file 'Main.cpp')
+      C:\Program Files\Microsoft Visual Studio\2022\Enterprise\VC\Tools\MSVC\14.42.34433\atlmfc\include\afxres.h(260,9):
+      see previous definition of 'ID_EDIT_UNDO'
+  
+C:\Users\2202790\source\WFFC-EditCoolerVersion\WOFFCEdit\resource.h(28,9): warning C4005: 'ID_EDIT_REDO': macro redefinition
+  (compiling source file 'Main.cpp')
+      C:\Program Files\Microsoft Visual Studio\2022\Enterprise\VC\Tools\MSVC\14.42.34433\atlmfc\include\afxres.h(261,9):
+      see previous definition of 'ID_EDIT_REDO'
+  
+  MFCFrame.cpp
+  _WIN32_WINNT not defined. Defaulting to _WIN32_WINNT_MAXVER (see WinSDKVer.h)
+C:\Users\2202790\source\WFFC-EditCoolerVersion\WOFFCEdit\resource.h(27,9): warning C4005: 'ID_EDIT_UNDO': macro redefinition
+  (compiling source file 'MFCFrame.cpp')
+      C:\Program Files\Microsoft Visual Studio\2022\Enterprise\VC\Tools\MSVC\14.42.34433\atlmfc\include\afxres.h(260,9):
+      see previous definition of 'ID_EDIT_UNDO'
+  
+C:\Users\2202790\source\WFFC-EditCoolerVersion\WOFFCEdit\resource.h(28,9): warning C4005: 'ID_EDIT_REDO': macro redefinition
+  (compiling source file 'MFCFrame.cpp')
+      C:\Program Files\Microsoft Visual Studio\2022\Enterprise\VC\Tools\MSVC\14.42.34433\atlmfc\include\afxres.h(261,9):
+      see previous definition of 'ID_EDIT_REDO'
+  
+  MFCMain.cpp
+  _WIN32_WINNT not defined. Defaulting to _WIN32_WINNT_MAXVER (see WinSDKVer.h)
+C:\Users\2202790\source\WFFC-EditCoolerVersion\WOFFCEdit\resource.h(27,9): warning C4005: 'ID_EDIT_UNDO': macro redefinition
+  (compiling source file 'MFCMain.cpp')
+      C:\Program Files\Microsoft Visual Studio\2022\Enterprise\VC\Tools\MSVC\14.42.34433\atlmfc\include\afxres.h(260,9):
+      see previous definition of 'ID_EDIT_UNDO'
+  
+C:\Users\2202790\source\WFFC-EditCoolerVersion\WOFFCEdit\resource.h(28,9): warning C4005: 'ID_EDIT_REDO': macro redefinition
+  (compiling source file 'MFCMain.cpp')
+      C:\Program Files\Microsoft Visual Studio\2022\Enterprise\VC\Tools\MSVC\14.42.34433\atlmfc\include\afxres.h(261,9):
+      see previous definition of 'ID_EDIT_REDO'
+  
+  SelectionCommand.cpp
+  ToolMain.cpp
+  _WIN32_WINNT not defined. Defaulting to _WIN32_WINNT_MAXVER (see WinSDKVer.h)
+C:\Users\2202790\source\WFFC-EditCoolerVersion\WOFFCEdit\resource.h(27,9): warning C4005: 'ID_EDIT_UNDO': macro redefinition
+  (compiling source file 'ToolMain.cpp')
+      C:\Program Files\Microsoft Visual Studio\2022\Enterprise\VC\Tools\MSVC\14.42.34433\atlmfc\include\afxres.h(260,9):
+      see previous definition of 'ID_EDIT_UNDO'
+  
+C:\Users\2202790\source\WFFC-EditCoolerVersion\WOFFCEdit\resource.h(28,9): warning C4005: 'ID_EDIT_REDO': macro redefinition
+  (compiling source file 'ToolMain.cpp')
+      C:\Program Files\Microsoft Visual Studio\2022\Enterprise\VC\Tools\MSVC\14.42.34433\atlmfc\include\afxres.h(261,9):
+      see previous definition of 'ID_EDIT_REDO'
+  
+C:\Users\2202790\source\WFFC-EditCoolerVersion\WOFFCEdit\ToolMain.cpp(105,46): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+C:\Users\2202790\source\WFFC-EditCoolerVersion\WOFFCEdit\ToolMain.cpp(106,46): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+C:\Users\2202790\source\WFFC-EditCoolerVersion\WOFFCEdit\ToolMain.cpp(107,46): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+C:\Users\2202790\source\WFFC-EditCoolerVersion\WOFFCEdit\ToolMain.cpp(108,46): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+C:\Users\2202790\source\WFFC-EditCoolerVersion\WOFFCEdit\ToolMain.cpp(109,46): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+C:\Users\2202790\source\WFFC-EditCoolerVersion\WOFFCEdit\ToolMain.cpp(110,46): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+C:\Users\2202790\source\WFFC-EditCoolerVersion\WOFFCEdit\ToolMain.cpp(111,46): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+C:\Users\2202790\source\WFFC-EditCoolerVersion\WOFFCEdit\ToolMain.cpp(112,46): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+C:\Users\2202790\source\WFFC-EditCoolerVersion\WOFFCEdit\ToolMain.cpp(113,46): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+C:\Users\2202790\source\WFFC-EditCoolerVersion\WOFFCEdit\ToolMain.cpp(125,48): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+C:\Users\2202790\source\WFFC-EditCoolerVersion\WOFFCEdit\ToolMain.cpp(126,48): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+C:\Users\2202790\source\WFFC-EditCoolerVersion\WOFFCEdit\ToolMain.cpp(127,48): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+C:\Users\2202790\source\WFFC-EditCoolerVersion\WOFFCEdit\ToolMain.cpp(131,48): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+C:\Users\2202790\source\WFFC-EditCoolerVersion\WOFFCEdit\ToolMain.cpp(132,47): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+C:\Users\2202790\source\WFFC-EditCoolerVersion\WOFFCEdit\ToolMain.cpp(133,42): warning C4244: '=': conversion from 'int' to 'float', possible loss of data
+C:\Users\2202790\source\WFFC-EditCoolerVersion\WOFFCEdit\ToolMain.cpp(137,50): warning C4244: '=': conversion from 'double' to 'int', possible loss of data
+C:\Users\2202790\source\WFFC-EditCoolerVersion\WOFFCEdit\ToolMain.cpp(138,50): warning C4244: '=': conversion from 'double' to 'int', possible loss of data
+C:\Users\2202790\source\WFFC-EditCoolerVersion\WOFFCEdit\ToolMain.cpp(148,57): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+C:\Users\2202790\source\WFFC-EditCoolerVersion\WOFFCEdit\ToolMain.cpp(149,57): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+C:\Users\2202790\source\WFFC-EditCoolerVersion\WOFFCEdit\ToolMain.cpp(150,57): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+C:\Users\2202790\source\WFFC-EditCoolerVersion\WOFFCEdit\ToolMain.cpp(151,58): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+C:\Users\2202790\source\WFFC-EditCoolerVersion\WOFFCEdit\ToolMain.cpp(152,58): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+C:\Users\2202790\source\WFFC-EditCoolerVersion\WOFFCEdit\ToolMain.cpp(153,58): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+C:\Users\2202790\source\WFFC-EditCoolerVersion\WOFFCEdit\ToolMain.cpp(154,59): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+C:\Users\2202790\source\WFFC-EditCoolerVersion\WOFFCEdit\ToolMain.cpp(155,56): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+C:\Users\2202790\source\WFFC-EditCoolerVersion\WOFFCEdit\ToolMain.cpp(156,54): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+C:\Users\2202790\source\WFFC-EditCoolerVersion\WOFFCEdit\ToolMain.cpp(157,57): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+  TransformDialog.cpp
+  _WIN32_WINNT not defined. Defaulting to _WIN32_WINNT_MAXVER (see WinSDKVer.h)
+C:\Users\2202790\source\WFFC-EditCoolerVersion\WOFFCEdit\resource.h(27,9): warning C4005: 'ID_EDIT_UNDO': macro redefinition
+  (compiling source file 'TransformDialog.cpp')
+      C:\Program Files\Microsoft Visual Studio\2022\Enterprise\VC\Tools\MSVC\14.42.34433\atlmfc\include\afxres.h(260,9):
+      see previous definition of 'ID_EDIT_UNDO'
+  
+C:\Users\2202790\source\WFFC-EditCoolerVersion\WOFFCEdit\resource.h(28,9): warning C4005: 'ID_EDIT_REDO': macro redefinition
+  (compiling source file 'TransformDialog.cpp')
+      C:\Program Files\Microsoft Visual Studio\2022\Enterprise\VC\Tools\MSVC\14.42.34433\atlmfc\include\afxres.h(261,9):
+      see previous definition of 'ID_EDIT_REDO'
+  
+C:\Users\2202790\source\WFFC-EditCoolerVersion\WOFFCEdit\TransformDialog.cpp(47,10): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
+C:\Users\2202790\source\WFFC-EditCoolerVersion\WOFFCEdit\TransformDialog.cpp(50,10): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
+C:\Users\2202790\source\WFFC-EditCoolerVersion\WOFFCEdit\TransformDialog.cpp(53,10): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
+C:\Users\2202790\source\WFFC-EditCoolerVersion\WOFFCEdit\TransformDialog.cpp(68,10): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
+C:\Users\2202790\source\WFFC-EditCoolerVersion\WOFFCEdit\TransformDialog.cpp(71,10): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
+C:\Users\2202790\source\WFFC-EditCoolerVersion\WOFFCEdit\TransformDialog.cpp(74,10): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
+C:\Users\2202790\source\WFFC-EditCoolerVersion\WOFFCEdit\TransformDialog.cpp(89,10): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
+C:\Users\2202790\source\WFFC-EditCoolerVersion\WOFFCEdit\TransformDialog.cpp(92,10): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
+C:\Users\2202790\source\WFFC-EditCoolerVersion\WOFFCEdit\TransformDialog.cpp(95,10): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
   Generating Code...
-  Win32SimpleSample.vcxproj -> C:\GameDev\WFFC-EditCoolerVersion\WOFFCEdit\Debug\WoFEdit.exe
+  Win32SimpleSample.vcxproj -> C:\Users\2202790\source\WFFC-EditCoolerVersion\WOFFCEdit\Debug\WoFEdit.exe

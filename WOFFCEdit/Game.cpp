@@ -907,8 +907,16 @@ void Game::DrawHierarchy()
         DirectX::Mouse::State mouseState = m_mouse->GetState();
         std::stringstream stream;
         stream << "Cam X: " << std::fixed << std::setprecision(2) << m_camera->GetCameraPosition().x;
+        stream << "Cam Y: " << std::fixed << std::setprecision(2) << m_camera->GetCameraPosition().y;
         stream << " Cam Z: " << std::fixed << std::setprecision(2) << m_camera->GetCameraPosition().z;
         std::string streamedString = stream.str();
+        ImGui::Text(streamedString.c_str());
+
+        stream.str("");
+        stream << "Cam RotX: " << std::fixed << std::setprecision(2) << m_camera->GetCameraRotation().x;
+        stream << " Cam RotY: " << std::fixed << std::setprecision(2) << m_camera->GetCameraRotation().y;
+        stream << " Cam RotZ: " << std::fixed << std::setprecision(2) << m_camera->GetCameraRotation().z;
+        streamedString = stream.str();
         ImGui::Text(streamedString.c_str());
 
         std::string mousePosString = "Mouse X: " + std::to_string(mouseState.x) + " Mouse Y: " + std::to_string(mouseState.y);

@@ -75,6 +75,10 @@ void Camera::Update()
 		m_cameraOrientation.x = std::max(m_cameraOrientation.x, -89.f);
 	}
 
+	m_cameraOrientation.x = abs(m_cameraOrientation.x) > 360.f ? m_cameraOrientation.x - (360.f * sign(m_cameraOrientation.x)) : m_cameraOrientation.x;
+	m_cameraOrientation.y = abs(m_cameraOrientation.y) > 360.f ? m_cameraOrientation.y - (360.f * sign(m_cameraOrientation.y)) : m_cameraOrientation.y;
+	m_cameraOrientation.z = abs(m_cameraOrientation.z > 360.f) ? m_cameraOrientation.z - (360.f * sign(m_cameraOrientation.z)) : m_cameraOrientation.z;
+
 	float pitch = (m_cameraOrientation.y) * 3.1415 / 180;
 	float yaw = (m_cameraOrientation.x) * 3.1415 / 180;
 	//create look direction from Euler angles in m_camOrientation
@@ -129,8 +133,18 @@ const Vector3& Camera::GetCameraPosition() const
 	return m_cameraPos;
 }
 
+const Vector3& Camera::GetCameraRotation() const
+{
+	return m_cameraOrientation;
+}
+
 const Matrix& Camera::GetViewMatrix() const
 {
 	return m_viewMatrix;
+}
+
+int Camera::sign(float number) const
+{
+	return (0.f < number) - (number < 0.f);
 }
 

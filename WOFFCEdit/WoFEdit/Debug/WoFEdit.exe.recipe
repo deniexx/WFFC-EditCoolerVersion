@@ -2,12 +2,12 @@
 <Project>
   <ProjectOutputs>
     <ProjectOutput>
-      <FullPath>C:\GameDev\WFFC-EditCoolerVersion\WOFFCEdit\Debug\WoFEdit.exe</FullPath>
+      <FullPath>C:\Users\2202790\source\WFFC-EditCoolerVersion\WOFFCEdit\Debug\WoFEdit.exe</FullPath>
     </ProjectOutput>
   </ProjectOutputs>
   <ContentFiles>
     <ContentFile>
-      <FullPath>C:\GameDev\WFFC-EditCoolerVersion\WOFFCEdit\database\data\Scene1.fbx</FullPath>
+      <FullPath>C:\Users\2202790\source\WFFC-EditCoolerVersion\WOFFCEdit\database\data\Scene1.fbx</FullPath>
     </ContentFile>
   </ContentFiles>
   <SatelliteDlls />

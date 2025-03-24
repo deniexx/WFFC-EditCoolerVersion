@@ -19,7 +19,12 @@ public:
 	void Update();
 
 	const Vector3& GetCameraPosition() const;
+	const Vector3& GetCameraRotation() const;
 	const Matrix& GetViewMatrix() const;
+
+private:
+
+	int sign(float number) const;
 
 private:
 

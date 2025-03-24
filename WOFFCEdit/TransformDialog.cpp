@@ -127,13 +127,13 @@ void TransformDialog::SetObjectData(ToolMain* toolMain, float PosX, float PosY, 
 	scaY = ScaY;
 	scaZ = ScaZ;
 
-	transX.SetWindowText(std::to_wstring(posX).c_str());
-	transY.SetWindowText(std::to_wstring(posY).c_str());
-	transZ.SetWindowText(std::to_wstring(posZ).c_str());
-	rotaX.SetWindowText(std::to_wstring(rotX).c_str());
-	rotaY.SetWindowText(std::to_wstring(rotY).c_str());
-	rotaZ.SetWindowText(std::to_wstring(rotZ).c_str());
-	scalX.SetWindowText(std::to_wstring(scaX).c_str());
-	scalY.SetWindowText(std::to_wstring(scaY).c_str());
-	scalZ.SetWindowText(std::to_wstring(scaZ).c_str());
+	transX.SetWindowText(std::to_wstring((int)posX).c_str());
+	transY.SetWindowText(std::to_wstring((int)posY).c_str());
+	transZ.SetWindowText(std::to_wstring((int)posZ).c_str());
+	rotaX.SetWindowText(std::to_wstring((int)rotX).c_str());
+	rotaY.SetWindowText(std::to_wstring((int)rotY).c_str());
+	rotaZ.SetWindowText(std::to_wstring((int)rotZ).c_str());
+	scalX.SetWindowText(std::to_wstring((int)scaX).c_str());
+	scalY.SetWindowText(std::to_wstring((int)scaY).c_str());
+	scalZ.SetWindowText(std::to_wstring((int)scaZ).c_str());
 }
