@@ -22,6 +22,8 @@ DisplayChunk::~DisplayChunk()
 
 void DisplayChunk::PopulateChunkData(ChunkObject * SceneChunk)
 {
+	m_heightMap.resize(TERRAINRESOLUTION * TERRAINRESOLUTION);
+
 	m_name = SceneChunk->name;
 	m_chunk_x_size_metres = SceneChunk->chunk_x_size_metres;
 	m_chunk_y_size_metres = SceneChunk->chunk_y_size_metres;
@@ -102,7 +104,7 @@ void DisplayChunk::LoadHeightMap(std::shared_ptr<DX::DeviceResources>  DevResour
 
 	// Here We Load The .RAW File Into Our pHeightMap Data Array
 	// We Are Only Reading In '1', And The Size Is (Width * Height)
-	fread(m_heightMap, 1, TERRAINRESOLUTION*TERRAINRESOLUTION, pFile);
+	fread(m_heightMap.data(), 1, TERRAINRESOLUTION * TERRAINRESOLUTION, pFile);
 
 	fclose(pFile);
 
@@ -158,7 +160,7 @@ void DisplayChunk::SaveHeightMap()
 		return;
 	}
 
-	fwrite(m_heightMap, 1, TERRAINRESOLUTION*TERRAINRESOLUTION, pFile);
+	fwrite(m_heightMap.data(), 1, TERRAINRESOLUTION * TERRAINRESOLUTION, pFile);
 	fclose(pFile);
 	
 }
@@ -182,6 +184,89 @@ void DisplayChunk::UpdateTerrain()
 void DisplayChunk::GenerateHeightmap()
 {
 	//insert how YOU want to update the heigtmap here! :D
+}
+
+VertArrayIndex DisplayChunk::GetVertexAtWorldPosition(DirectX::SimpleMath::Vector3 worldHit)
+{
+	float gridX = (worldHit.x + (0.5f * m_terrainSize)) / m_terrainPositionScalingFactor;
+	float gridZ = (worldHit.z + (0.5f * m_terrainSize)) / m_terrainPositionScalingFactor;
+
+	return { static_cast<int>(std::round(gridX)), static_cast<int>(std::round(gridZ)) };
+}
+
+const DirectX::VertexPositionNormalTexture& DisplayChunk::GetVertex(int x, int y)
+{
+	return m_terrainGeometry[x][y];
+}
+
+void DisplayChunk::ModifyTerrain(DirectX::SimpleMath::Vector3 worldHit, float radius)
+{
+	auto vertIndex = GetVertexAtWorldPosition(worldHit);
+	auto maxV = TERRAINRESOLUTION - 1;
+
+	if (vertIndex.x < 0 || vertIndex.x > maxV)
+	{
+		return;
+	}
+	if (vertIndex.y < 0 || vertIndex.y > maxV)
+	{
+		return;
+	}
+
+	float gridRadius = radius / m_terrainPositionScalingFactor;
+	gridRadius = std::max(gridRadius, 0.5f);
+
+	int minX = std::max(0, static_cast<int>((std::floor(vertIndex.x - gridRadius))));
+	int maxX = std::min(maxV, static_cast<int>((std::ceil(vertIndex.x + gridRadius))));
+	int minY = std::max(0, static_cast<int>((std::floor(vertIndex.y - gridRadius))));
+	int maxY = std::min(maxV, static_cast<int>((std::ceil(vertIndex.y + gridRadius))));
+
+	bool modified = false;
+
+	for (int y = minY; y <= maxY; ++y)
+	{
+		for (int x = minX; x <= maxX; ++x)
+		{
+			float dx = static_cast<float>(x - vertIndex.x);
+			float dy = static_cast<float>(y - vertIndex.y);
+			float distSq = (dx * dx) + (dy * dy);
+
+			if (distSq <= (gridRadius * gridRadius))
+			{
+				int index = y * TERRAINRESOLUTION + x;
+
+				if (index >= 0 && index < TERRAINRESOLUTION * TERRAINRESOLUTION)
+				{
+					if (m_heightMap[index] < 255)
+					{
+						m_heightMap[index] += 1;
+						modified = true;
+					}
+				}
+			}
+		}
+	}
+
+	if (modified)
+	{
+		UpdateTerrain();
+	}
+}
+
+BYTE DisplayChunk::GetHeight(int index)
+{
+	return m_heightMap[index];
+}
+
+void DisplayChunk::SetHeightMap(std::vector<BYTE> newHeightMap)
+{
+	m_heightMap = newHeightMap;
+	UpdateTerrain();
+}
+
+std::vector<BYTE> DisplayChunk::GetHeightMap()
+{
+	return m_heightMap;
 }
 
 void DisplayChunk::CalculateTerrainNormals()

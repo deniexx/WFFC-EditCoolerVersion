@@ -99,6 +99,9 @@
     <ClCompile Include="TransformDialog.cpp">
       <Filter>MFC</Filter>
     </ClCompile>
+    <ClCompile Include="TerrainEditCommand.cpp">
+      <Filter>Command</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="DeviceResources.h">
@@ -181,6 +184,9 @@
     </ClInclude>
     <ClInclude Include="TransformDialog.h">
       <Filter>MFC</Filter>
+    </ClInclude>
+    <ClInclude Include="TerrainEditCommand.h">
+      <Filter>Command</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

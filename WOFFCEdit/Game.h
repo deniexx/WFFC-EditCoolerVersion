@@ -59,11 +59,12 @@ public:
 	void SaveDisplayChunk(ChunkObject *SceneChunk);	//saves geometry et al
 	void ClearDisplayList();
 
-
 	void SetPickedObjectsVector(std::vector<int> newPickedObjects);
 	void SetPickedObject(int id);
 	void AddPickedObject(int id);
 	void RemovePickedObject(int id);
+	void SetTerrainHeightMap(const std::vector<BYTE>& newHeightMap);
+	void ToggleTerrainPainting();
 	
 	//template <typename T = Command, typename ...Args>
 	void ExecuteCommand(std::shared_ptr<Command> command);
@@ -87,6 +88,8 @@ private:
 
 	int PickObjectUnderMouse();
 	void HandleObjectPicking(int selected);
+	void PickTerrainAndModify(bool modify);
+	void UpdateTerrainDebugCircle();
 
 	void DrawImGui();
 	void DrawHierarchy();
@@ -151,7 +154,21 @@ private:
 	bool m_wasYDown = false;
 	bool m_zReleased = false;
 	bool m_yReleased = false;
+	bool m_tDowLastFrame = false;
 	bool m_dialogHovered = false;
+	bool m_editingTerrain = true;
+
+	/** Terrain Debug Circle */
+	Vector3 m_currentTerrainHit;
+	float m_terrainEditRadius = 15.f;
+	bool m_isHittingTerrain;
+	std::vector<DirectX::VertexPositionColor> m_debugCircleVertices;
+
+	std::unique_ptr<DirectX::PrimitiveBatch<DirectX::VertexPositionColor>> m_debugBatch;
+	std::unique_ptr<DirectX::BasicEffect> m_debugEffect;
+	Microsoft::WRL::ComPtr<ID3D11InputLayout> m_debugInputLayout;
+	std::vector<BYTE> m_oldTerrainData;
+	/** End Terrain Debug Circle */
 
 #ifdef DXTK_AUDIO
     uint32_t                                                                m_audioEvent;

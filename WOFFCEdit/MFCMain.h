@@ -39,6 +39,7 @@ private:
 	afx_msg void UndoButton();
 	afx_msg void RedoButton();
 	afx_msg void TransformButton();
+	afx_msg void ToggleTerrainPainting();
 
 
 	DECLARE_MESSAGE_MAP()	// required macro for message map functionality  One per class

@@ -27,6 +27,7 @@ public: //methods
 
 	afx_msg void onUndoButton();
 	afx_msg void onRedoButton();
+	afx_msg void onToggleTerrainPainting();
 
 	void TranslateSelected(float x, float y, float z);
 	void RotateSelected(float x, float y, float z);

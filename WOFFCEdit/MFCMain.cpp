@@ -9,6 +9,7 @@ BEGIN_MESSAGE_MAP(MFCMain, CWinApp)
 	ON_COMMAND(ID_BUTTON40001,	&MFCMain::ToolBarButton1)
 	ON_COMMAND(ID_EDIT_UNDO, &MFCMain::UndoButton)
 	ON_COMMAND(ID_EDIT_REDO, &MFCMain::RedoButton)
+	ON_COMMAND(ID_EDIT_TOGGLETERRAINPAINTING, &MFCMain::ToggleTerrainPainting)
 	ON_COMMAND(ID_EDIT_TRANSFORMTOOL, &MFCMain::TransformButton)
 	ON_UPDATE_COMMAND_UI(ID_INDICATOR_TOOL, &CMyFrame::OnUpdatePage)
 END_MESSAGE_MAP()
@@ -113,7 +114,6 @@ void MFCMain::MenuEditSelect()
 
 void MFCMain::ToolBarButton1()
 {
-	
 	m_ToolSystem.onActionSave();
 }
 
@@ -141,6 +141,11 @@ void MFCMain::TransformButton()
 	m_transformDialog.SetObjectData(&m_ToolSystem, sceneObject->posX, sceneObject->posY, sceneObject->posZ,
 									sceneObject->rotX, sceneObject->rotY, sceneObject->rotZ, 
 									sceneObject->scaX, sceneObject->scaY, sceneObject->scaZ);
+}
+
+void MFCMain::ToggleTerrainPainting()
+{
+	m_ToolSystem.onToggleTerrainPainting();
 }
 
 MFCMain::MFCMain()

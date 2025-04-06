@@ -300,6 +300,11 @@ void ToolMain::onRedoButton()
 	m_d3dRenderer.RedoCommand();
 }
 
+void ToolMain::onToggleTerrainPainting()
+{
+	m_d3dRenderer.ToggleTerrainPainting();
+}
+
 void ToolMain::TranslateSelected(float x, float y, float z)
 {
 	int objectIndex = m_d3dRenderer.GetPickedObjects()[m_d3dRenderer.GetPickedObjects().size() - 1];
@@ -484,6 +489,11 @@ void ToolMain::UpdateInput(MSG * msg)
 		m_toolInputCommands.yDown = true;
 	}
 	else m_toolInputCommands.yDown = false;
+	if (m_keyArray['T'])
+	{
+		m_toolInputCommands.tDown = true;
+	}
+	else m_toolInputCommands.tDown = false;
 }
 
 SceneObject* ToolMain::GetSelectedObject()

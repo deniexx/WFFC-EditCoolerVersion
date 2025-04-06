@@ -6,6 +6,11 @@
 //geometric resoltuion - note,  hard coded.
 #define TERRAINRESOLUTION 128
 
+struct VertArrayIndex
+{
+	int x, y;
+};
+
 class DisplayChunk
 {
 public:
@@ -24,16 +29,23 @@ public:
 	ID3D11ShaderResourceView *					m_texture_diffuse;				//diffuse texture
 	Microsoft::WRL::ComPtr<ID3D11InputLayout>   m_terrainInputLayout;
 
-private:
-	
-	DirectX::VertexPositionNormalTexture m_terrainGeometry[TERRAINRESOLUTION][TERRAINRESOLUTION];
-	BYTE m_heightMap[TERRAINRESOLUTION*TERRAINRESOLUTION];
-	void CalculateTerrainNormals();
+	VertArrayIndex GetVertexAtWorldPosition(DirectX::SimpleMath::Vector3 worldHit);
+	const DirectX::VertexPositionNormalTexture& GetVertex(int x, int y);
+	void ModifyTerrain(DirectX::SimpleMath::Vector3 worldHit, float radius);
+	BYTE GetHeight(int index);
+	void SetHeightMap(std::vector<BYTE> newHeightMap);
+	std::vector<BYTE> GetHeightMap();
 
 	float	m_terrainHeightScale;
 	int		m_terrainSize;				//size of terrain in metres
 	float	m_textureCoordStep;			//step in texture coordinates between each vertex row / column
 	float   m_terrainPositionScalingFactor;	//factor we multiply the position by to convert it from its native resolution( 0- Terrain Resolution) to full scale size in metres dictated by m_Terrainsize
+
+private:
+	
+	DirectX::VertexPositionNormalTexture m_terrainGeometry[TERRAINRESOLUTION][TERRAINRESOLUTION];
+	std::vector<BYTE> m_heightMap;
+	void CalculateTerrainNormals();
 	
 	std::string m_name;
 	int m_chunk_x_size_metres;
@@ -55,4 +67,3 @@ private:
 	int m_tex_splat_4_tiling;
 
 };
-

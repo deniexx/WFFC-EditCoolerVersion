@@ -1,4 +1,3 @@
-//
 // Game.cpp
 //
 
@@ -19,6 +18,7 @@ using namespace DirectX::SimpleMath;
 using Microsoft::WRL::ComPtr;
 
 #include "SelectionCommand.h"
+#include "TerrainEditCommand.h"
 
 Game::Game()
 
@@ -190,22 +190,50 @@ void Game::Update(DX::StepTimer const& timer)
     {
         m_camera->AddMovementInput(Vector3(0.f, -1.f, 0.f));
     }
+    if (m_tDowLastFrame && !m_InputCommands->tDown)
+    {
+        m_InputCommands->tDown = false;
+        ToggleTerrainPainting();
+    }
 
     bool wasLMBReleased = m_lmbDownLastFrame == true && mouseState.leftButton == false;
     if (wasLMBReleased && !ImGui::IsAnyItemHovered() && !m_dialogHovered)
     {
-        int selected = PickObjectUnderMouse();
-        HandleObjectPicking(selected);
+        if (!m_editingTerrain)
+        {
+            int selected = PickObjectUnderMouse();
+            HandleObjectPicking(selected);
+        }
+        else if (m_editingTerrain)
+        {
+            std::shared_ptr<TerrainEditCommand> cmd = std::make_shared<TerrainEditCommand>(m_oldTerrainData, m_displayChunk.GetHeightMap());
+            ExecuteCommand(cmd);
+        }
+    }
+    if (m_lmbDownLastFrame == false && mouseState.leftButton && m_editingTerrain)
+    {
+        m_oldTerrainData = m_displayChunk.GetHeightMap();
+    }
+    if (m_editingTerrain && !ImGui::IsAnyItemHovered() && !m_dialogHovered)
+    {
+        PickTerrainAndModify(mouseState.leftButton);
+    }
+    else
+    {
+        m_debugCircleVertices.clear();
     }
 
     m_camera->Update();
     m_batchEffect->SetView(m_camera->GetViewMatrix());
     m_batchEffect->SetWorld(Matrix::Identity);
+    m_debugEffect->SetView(m_camera->GetViewMatrix());
+    m_debugEffect->SetProjection(m_projection);
 	m_displayChunk.m_terrainEffect->SetView(m_camera->GetViewMatrix());
 	m_displayChunk.m_terrainEffect->SetWorld(Matrix::Identity);
 
     m_rmbDownLastFrame = mouseState.rightButton;
     m_lmbDownLastFrame = mouseState.leftButton;
+    m_tDowLastFrame = m_InputCommands->tDown;
 
     m_lastMouse = Vector3(mouseState.x, mouseState.y, 0.f);
     UpdateHotkeys();
@@ -327,6 +355,30 @@ void Game::Render()
 
 	//Render the batch,  This is handled in the Display chunk becuase it has the potential to get complex
 	m_displayChunk.RenderBatch(m_deviceResources);
+
+    if (!m_debugCircleVertices.empty())
+    {
+        auto context = m_deviceResources->GetD3DDeviceContext();
+        context->OMSetBlendState(m_states->Opaque(), nullptr, 0xFF0000FF);
+        context->OMSetDepthStencilState(m_states->DepthDefault(), 0);
+        context->RSSetState(m_states->CullNone());
+
+        m_debugEffect->Apply(context);
+        context->IASetInputLayout(m_debugInputLayout.Get());
+
+        m_debugBatch->Begin();
+
+        for (size_t i = 0; i < m_debugCircleVertices.size() - 1; ++i)
+        {
+            m_debugBatch->DrawLine(m_debugCircleVertices[i], m_debugCircleVertices[i + 1]);
+        }
+        if (m_debugCircleVertices.size() > 1) {
+            m_debugBatch->DrawLine(m_debugCircleVertices.back(), m_debugCircleVertices.front());
+        }
+
+
+        m_debugBatch->End();
+    }
 
     DirectX::Mouse::State mouseState = m_mouse->GetState();
     DrawImGui();
@@ -626,6 +678,11 @@ void Game::RemovePickedObject(int id)
     m_pickedObjects.erase(std::remove(m_pickedObjects.begin(), m_pickedObjects.end(), id), m_pickedObjects.end());
 }
 
+void Game::SetTerrainHeightMap(const std::vector<BYTE>& newHeightMap)
+{
+    m_displayChunk.SetHeightMap(newHeightMap);
+}
+
 #ifdef DXTK_AUDIO
 void Game::NewAudioDevice()
 {
@@ -661,6 +718,11 @@ void Game::CreateDeviceDependentResources()
     m_batchEffect = std::make_unique<BasicEffect>(device);
     m_batchEffect->SetVertexColorEnabled(true);
 
+    m_debugBatch = std::make_unique<PrimitiveBatch<VertexPositionColor>>(m_deviceResources->GetD3DDeviceContext());
+
+    m_debugEffect = std::make_unique<BasicEffect>(device);
+    m_debugEffect->SetVertexColorEnabled(true);
+
     {
         void const* shaderByteCode;
         size_t byteCodeLength;
@@ -672,6 +734,15 @@ void Game::CreateDeviceDependentResources()
                 VertexPositionColor::InputElementCount,
                 shaderByteCode, byteCodeLength,
                 m_batchInputLayout.ReleaseAndGetAddressOf())
+        );
+
+        m_debugEffect->GetVertexShaderBytecode(&shaderByteCode, &byteCodeLength);
+
+        DX::ThrowIfFailed(
+            device->CreateInputLayout(VertexPositionColor::InputElements,
+                VertexPositionColor::InputElementCount,
+                shaderByteCode, byteCodeLength,
+                m_debugInputLayout.ReleaseAndGetAddressOf())
         );
     }
 
@@ -717,7 +788,9 @@ void Game::CreateWindowSizeDependentResources()
     );
 
     m_batchEffect->SetProjection(m_projection);
-	
+
+    m_debugEffect->SetView(m_camera->GetViewMatrix());
+    m_debugEffect->SetProjection(m_projection);
 }
 
 int Game::PickObjectUnderMouse()
@@ -835,6 +908,124 @@ void Game::HandleObjectPicking(int selected)
             ExecuteCommand(command);
         }
 
+    }
+}
+
+void Game::PickTerrainAndModify(bool modify)
+{
+    const RECT screenDimensions = m_deviceResources->GetOutputSize();
+    const DirectX::Mouse::State state = m_mouse->GetState();
+
+    const XMVECTOR nearSource = XMVectorSet(static_cast<float>(state.x), static_cast<float>(state.y), 0.f, 1.f);
+    const XMVECTOR farSource = XMVectorSet(static_cast<float>(state.x), static_cast<float>(state.y), 1.f, 1.f);
+    
+    const XMMATRIX viewMatrix = m_camera->GetViewMatrix();
+    const XMMATRIX projectionMatrix = m_projection;
+
+    const XMVECTOR nearPoint = XMVector3Unproject(
+        nearSource, 0.f, 0.f, static_cast<float>(screenDimensions.right), static_cast<float>(screenDimensions.bottom),
+        m_deviceResources->GetScreenViewport().MinDepth,
+        m_deviceResources->GetScreenViewport().MaxDepth,
+        projectionMatrix, viewMatrix, DirectX::XMMatrixIdentity() // Use Identity for world
+    );
+
+    const XMVECTOR farPoint = XMVector3Unproject(
+        farSource, 0.f, 0.f, static_cast<float>(screenDimensions.right), static_cast<float>(screenDimensions.bottom),
+        m_deviceResources->GetScreenViewport().MinDepth,
+        m_deviceResources->GetScreenViewport().MaxDepth,
+        projectionMatrix, viewMatrix, DirectX::XMMatrixIdentity() // Use Identity for world
+    );
+
+    const XMVECTOR pickingRayDirection = XMVector3Normalize(farPoint - nearPoint);
+    const XMVECTOR pickingRayOrigin = nearPoint;
+    
+    DirectX::SimpleMath::Vector3 hitPoint;
+    bool terrainHit = false;
+    float closestDistance = FLT_MAX;
+
+    for (int i = 0; i < TERRAINRESOLUTION - 1; ++i)
+    {
+        for (int j = 0; j < TERRAINRESOLUTION - 1; ++j)
+        {
+            const XMVECTOR v0 = XMLoadFloat3(&m_displayChunk.GetVertex(i, j).position);
+            const XMVECTOR v1 = XMLoadFloat3(&m_displayChunk.GetVertex(i, j + 1).position);
+            const XMVECTOR v2 = XMLoadFloat3(&m_displayChunk.GetVertex(i + 1, j + 1).position);
+            const XMVECTOR v3 = XMLoadFloat3(&m_displayChunk.GetVertex(i + 1, j).position);
+
+            float triDist = 0.f;
+            if (DirectX::TriangleTests::Intersects(pickingRayOrigin, pickingRayDirection, v0, v1, v3, triDist))
+            {
+                if (triDist >= 0.f && triDist < closestDistance)
+                {
+                    closestDistance = triDist;
+                    // Calculate the actual hit point in world space
+                    XMStoreFloat3(&hitPoint, pickingRayOrigin + pickingRayDirection * triDist);
+                    terrainHit = true;
+                    break;
+                }
+            }
+
+            if (DirectX::TriangleTests::Intersects(pickingRayOrigin, pickingRayDirection, v1, v2, v3, triDist))
+            {
+                if (triDist >= 0.f && triDist < closestDistance)
+                {
+                    closestDistance = triDist;
+                    // Calculate the actual hit point in world space
+                    XMStoreFloat3(&hitPoint, pickingRayOrigin + pickingRayDirection * triDist);
+                    terrainHit = true;
+                    break;
+                }
+            }
+        }
+    }
+
+    if (terrainHit)
+    {
+        m_currentTerrainHit = hitPoint;
+        UpdateTerrainDebugCircle();
+
+        if (modify)
+        {
+            m_displayChunk.ModifyTerrain(hitPoint, m_terrainEditRadius);
+        }
+    }
+}
+
+void Game::UpdateTerrainDebugCircle()
+{
+    m_debugCircleVertices.clear();
+
+    const int numSegments = 64;
+    const Vector3 center = m_currentTerrainHit;
+    const float radius = m_terrainEditRadius;
+    const float heightScale = m_displayChunk.m_terrainHeightScale;
+    const float posScale = m_displayChunk.m_terrainPositionScalingFactor;
+    const float terrainSize = static_cast<float>(m_displayChunk.m_terrainSize);
+
+    for (int i = 0; i <= numSegments; ++i)
+    {
+        float angle = static_cast<float>(i) / numSegments * 2.0f * XM_PI;
+        float worldX = center.x + cos(angle) * radius;
+        float worldZ = center.z + sin(angle) * radius;
+
+        float gridX_f = (worldX + (0.5f * terrainSize)) / posScale;
+        float gridZ_f = (worldZ + (0.5f * terrainSize)) / posScale;
+
+        gridX_f = std::max(0.f, std::min(gridX_f, static_cast<float>(TERRAINRESOLUTION - 1)));
+        gridZ_f = std::max(0.f, std::min(gridZ_f, static_cast<float>(TERRAINRESOLUTION - 1)));
+
+        int gridX = static_cast<int>(std::round(gridX_f));
+        int gridZ = static_cast<int>(std::round(gridZ_f));
+        int index = gridZ * TERRAINRESOLUTION + gridX;
+
+        if (index < 0 || index >= TERRAINRESOLUTION * TERRAINRESOLUTION)
+        {
+            index = 0;
+        }
+        BYTE height = m_displayChunk.GetHeight(index);
+        float worldY = static_cast<float>(height) * heightScale + 0.25f;
+
+        m_debugCircleVertices.push_back(DirectX::VertexPositionColor(Vector3(worldX, worldY + 0.1f, worldZ), DirectX::Colors::Red));
     }
 }
 
@@ -973,4 +1164,9 @@ void Game::DrawHierarchy()
         ImGui::Unindent();
             
     }
+}
+
+void Game::ToggleTerrainPainting()
+{
+    m_editingTerrain = !m_editingTerrain;
 }

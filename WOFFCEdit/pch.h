@@ -41,6 +41,7 @@
 #include <exception>
 #include <memory>
 #include <stdexcept>
+#include <cmath>
 
 //#include <stdio.h>
 
