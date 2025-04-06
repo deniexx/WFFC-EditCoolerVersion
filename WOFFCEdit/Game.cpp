@@ -166,6 +166,14 @@ void Game::Update(DX::StepTimer const& timer)
             SetCursor(m_cursor);
         }
     }
+    if (m_InputCommands->plusDown)
+    {
+        AddToTerrainBrushSize(1.f);
+    }
+    if (m_InputCommands->plusDown)
+    {
+        AddToTerrainBrushSize(-1.f);
+    }
     if (m_InputCommands->forward)
     {
         m_camera->AddMovementInput(Vector3(1.f, 0.f, 0.f));
@@ -190,7 +198,7 @@ void Game::Update(DX::StepTimer const& timer)
     {
         m_camera->AddMovementInput(Vector3(0.f, -1.f, 0.f));
     }
-    if (m_tDowLastFrame && !m_InputCommands->tDown)
+    if (m_tDownLastFrame && !m_InputCommands->tDown)
     {
         m_InputCommands->tDown = false;
         ToggleTerrainPainting();
@@ -233,7 +241,9 @@ void Game::Update(DX::StepTimer const& timer)
 
     m_rmbDownLastFrame = mouseState.rightButton;
     m_lmbDownLastFrame = mouseState.leftButton;
-    m_tDowLastFrame = m_InputCommands->tDown;
+    m_tDownLastFrame = m_InputCommands->tDown;
+    m_plusDownLastFrame = m_InputCommands->plusDown;
+    m_minusDownLastFrame = m_InputCommands->minusDown;
 
     m_lastMouse = Vector3(mouseState.x, mouseState.y, 0.f);
     UpdateHotkeys();
@@ -986,7 +996,7 @@ void Game::PickTerrainAndModify(bool modify)
 
         if (modify)
         {
-            m_displayChunk.ModifyTerrain(hitPoint, m_terrainEditRadius);
+            m_displayChunk.ModifyTerrain(hitPoint, m_terrainEditRadius, m_InputCommands->shiftDown ? -1 : 1);
         }
     }
 }
@@ -1130,6 +1140,11 @@ void Game::DrawHierarchy()
 
             ImGui::Text(allSelectedObjectsString.c_str());
         }
+        if (ImGui::CollapsingHeader("TerrainData"))
+        {
+            std::string terrainEditString = "Terrain Edit Radius" + std::to_string(m_terrainEditRadius);
+            ImGui::Text(terrainEditString.c_str());
+        }
         ImGui::Unindent();
     }
 
@@ -1169,4 +1184,17 @@ void Game::DrawHierarchy()
 void Game::ToggleTerrainPainting()
 {
     m_editingTerrain = !m_editingTerrain;
+}
+
+void Game::AddToTerrainBrushSize(float delta)
+{
+    m_terrainEditRadius += delta;
+    if (m_terrainEditRadius < 0.f)
+    {
+        m_terrainEditRadius = 0.f;
+    }
+    else if (m_terrainEditRadius > 50.f)
+    {
+        m_terrainEditRadius = 50.f;
+    }
 }

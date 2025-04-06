@@ -7,6 +7,8 @@ BEGIN_MESSAGE_MAP(MFCMain, CWinApp)
 	ON_COMMAND(ID_FILE_SAVETERRAIN, &MFCMain::MenuFileSaveTerrain)
 	ON_COMMAND(ID_EDIT_SELECT, &MFCMain::MenuEditSelect)
 	ON_COMMAND(ID_BUTTON40001,	&MFCMain::ToolBarButton1)
+	ON_COMMAND(ID_BUTTON40009,	&MFCMain::IncreaseTerrainBrushSize)
+	ON_COMMAND(ID_BUTTON40010,	&MFCMain::DecreaseTerrainBrushSize)
 	ON_COMMAND(ID_EDIT_UNDO, &MFCMain::UndoButton)
 	ON_COMMAND(ID_EDIT_REDO, &MFCMain::RedoButton)
 	ON_COMMAND(ID_EDIT_TOGGLETERRAINPAINTING, &MFCMain::ToggleTerrainPainting)
@@ -146,6 +148,16 @@ void MFCMain::TransformButton()
 void MFCMain::ToggleTerrainPainting()
 {
 	m_ToolSystem.onToggleTerrainPainting();
+}
+
+void MFCMain::IncreaseTerrainBrushSize()
+{
+	m_ToolSystem.addToTerrainBrushSize(1.f);
+}
+
+void MFCMain::DecreaseTerrainBrushSize()
+{
+	m_ToolSystem.addToTerrainBrushSize(-1.f);
 }
 
 MFCMain::MFCMain()

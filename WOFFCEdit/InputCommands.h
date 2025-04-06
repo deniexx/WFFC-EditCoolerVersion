@@ -14,4 +14,6 @@ struct InputCommands
 	bool shiftDown = false;
 	bool controlDown = false;
 	bool tDown = false;
+	bool plusDown = false;
+	bool minusDown = false;
 };

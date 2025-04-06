@@ -137,8 +137,6 @@ void DisplayChunk::LoadHeightMap(std::shared_ptr<DX::DeviceResources>  DevResour
 		);
 
 	m_batch = std::make_unique<PrimitiveBatch<VertexPositionNormalTexture>>(devicecontext);
-
-	
 }
 
 void DisplayChunk::SaveHeightMap()
@@ -199,7 +197,7 @@ const DirectX::VertexPositionNormalTexture& DisplayChunk::GetVertex(int x, int y
 	return m_terrainGeometry[x][y];
 }
 
-void DisplayChunk::ModifyTerrain(DirectX::SimpleMath::Vector3 worldHit, float radius)
+void DisplayChunk::ModifyTerrain(DirectX::SimpleMath::Vector3 worldHit, float radius, int direction)
 {
 	auto vertIndex = GetVertexAtWorldPosition(worldHit);
 	auto maxV = TERRAINRESOLUTION - 1;
@@ -237,9 +235,14 @@ void DisplayChunk::ModifyTerrain(DirectX::SimpleMath::Vector3 worldHit, float ra
 
 				if (index >= 0 && index < TERRAINRESOLUTION * TERRAINRESOLUTION)
 				{
-					if (m_heightMap[index] < 255)
+					if (m_heightMap[index] < 255 && direction > 0)
 					{
-						m_heightMap[index] += 1;
+						m_heightMap[index] += direction;
+						modified = true;
+					}
+					if (m_heightMap[index] > 0 && direction < 0)
+					{
+						m_heightMap[index] += direction;
 						modified = true;
 					}
 				}

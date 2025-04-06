@@ -31,7 +31,7 @@ public:
 
 	VertArrayIndex GetVertexAtWorldPosition(DirectX::SimpleMath::Vector3 worldHit);
 	const DirectX::VertexPositionNormalTexture& GetVertex(int x, int y);
-	void ModifyTerrain(DirectX::SimpleMath::Vector3 worldHit, float radius);
+	void ModifyTerrain(DirectX::SimpleMath::Vector3 worldHit, float radius, int direction);
 	BYTE GetHeight(int index);
 	void SetHeightMap(std::vector<BYTE> newHeightMap);
 	std::vector<BYTE> GetHeightMap();

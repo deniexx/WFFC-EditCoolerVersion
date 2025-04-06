@@ -65,6 +65,7 @@ public:
 	void RemovePickedObject(int id);
 	void SetTerrainHeightMap(const std::vector<BYTE>& newHeightMap);
 	void ToggleTerrainPainting();
+	void AddToTerrainBrushSize(float delta);
 	
 	//template <typename T = Command, typename ...Args>
 	void ExecuteCommand(std::shared_ptr<Command> command);
@@ -154,7 +155,9 @@ private:
 	bool m_wasYDown = false;
 	bool m_zReleased = false;
 	bool m_yReleased = false;
-	bool m_tDowLastFrame = false;
+	bool m_tDownLastFrame = false;
+	bool m_plusDownLastFrame = false;
+	bool m_minusDownLastFrame = false;
 	bool m_dialogHovered = false;
 	bool m_editingTerrain = true;
 

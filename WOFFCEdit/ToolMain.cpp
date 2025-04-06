@@ -305,6 +305,11 @@ void ToolMain::onToggleTerrainPainting()
 	m_d3dRenderer.ToggleTerrainPainting();
 }
 
+void ToolMain::addToTerrainBrushSize(float delta)
+{
+	m_d3dRenderer.AddToTerrainBrushSize(delta);
+}
+
 void ToolMain::TranslateSelected(float x, float y, float z)
 {
 	int objectIndex = m_d3dRenderer.GetPickedObjects()[m_d3dRenderer.GetPickedObjects().size() - 1];
@@ -494,6 +499,16 @@ void ToolMain::UpdateInput(MSG * msg)
 		m_toolInputCommands.tDown = true;
 	}
 	else m_toolInputCommands.tDown = false;
+	if (m_keyArray[VK_OEM_PLUS])
+	{
+		m_toolInputCommands.plusDown = true;
+	}
+	else m_toolInputCommands.plusDown = false;
+	if (m_keyArray[VK_OEM_MINUS])
+	{
+		m_toolInputCommands.minusDown = true;
+	}
+	else m_toolInputCommands.minusDown = false;
 }
 
 SceneObject* ToolMain::GetSelectedObject()
