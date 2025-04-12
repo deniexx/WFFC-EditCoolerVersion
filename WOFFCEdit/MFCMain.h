@@ -42,6 +42,9 @@ private:
 	afx_msg void ToggleTerrainPainting();
 	afx_msg void IncreaseTerrainBrushSize();
 	afx_msg void DecreaseTerrainBrushSize();
+	afx_msg void ToggleSplineEditing();
+	afx_msg void IncreaseSplineQuality();
+	afx_msg void DecreaseSplineQuality();
 
 
 	DECLARE_MESSAGE_MAP()	// required macro for message map functionality  One per class

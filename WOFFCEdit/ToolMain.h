@@ -28,7 +28,9 @@ public: //methods
 	afx_msg void onUndoButton();
 	afx_msg void onRedoButton();
 	afx_msg void onToggleTerrainPainting();
+	afx_msg void onToggleSplineEditing();
 	afx_msg void addToTerrainBrushSize(float delta);
+	afx_msg void addToSplineQuality(float delta);
 
 	void TranslateSelected(float x, float y, float z);
 	void RotateSelected(float x, float y, float z);

@@ -19,6 +19,7 @@ using Microsoft::WRL::ComPtr;
 
 #include "SelectionCommand.h"
 #include "TerrainEditCommand.h"
+#include "EditSplineCommand.h"
 
 Game::Game()
 
@@ -127,6 +128,70 @@ void Game::Tick(InputCommands *Input)
     Render();
 }
 
+bool Game::TraceAgainstTerrain(Vector3& outHit)
+{
+    const RECT screenDimensions = m_deviceResources->GetOutputSize();
+    const DirectX::Mouse::State state = m_mouse->GetState();
+
+    const XMVECTOR nearSource = XMVectorSet(static_cast<float>(state.x), static_cast<float>(state.y), 0.f, 1.f);
+    const XMVECTOR farSource = XMVectorSet(static_cast<float>(state.x), static_cast<float>(state.y), 1.f, 1.f);
+
+    const XMMATRIX viewMatrix = m_camera->GetViewMatrix();
+    const XMMATRIX projectionMatrix = m_projection;
+
+    const XMVECTOR nearPoint = XMVector3Unproject(
+        nearSource, 0.f, 0.f, static_cast<float>(screenDimensions.right), static_cast<float>(screenDimensions.bottom),
+        m_deviceResources->GetScreenViewport().MinDepth,
+        m_deviceResources->GetScreenViewport().MaxDepth,
+        projectionMatrix, viewMatrix, DirectX::XMMatrixIdentity()
+    );
+
+    const XMVECTOR farPoint = XMVector3Unproject(
+        farSource, 0.f, 0.f, static_cast<float>(screenDimensions.right), static_cast<float>(screenDimensions.bottom),
+        m_deviceResources->GetScreenViewport().MinDepth,
+        m_deviceResources->GetScreenViewport().MaxDepth,
+        projectionMatrix, viewMatrix, DirectX::XMMatrixIdentity()
+    );
+
+    const XMVECTOR pickingRayDirection = XMVector3Normalize(farPoint - nearPoint);
+    const XMVECTOR pickingRayOrigin = nearPoint;
+    float closestDistance = 99999999.f;
+    bool hit = false;
+
+    for (int i = 0; i < TERRAINRESOLUTION - 1; ++i)
+    {
+        for (int j = 0; j < TERRAINRESOLUTION - 1; ++j)
+        {
+            const XMVECTOR v0 = XMLoadFloat3(&m_displayChunk.GetVertex(i, j).position);
+            const XMVECTOR v1 = XMLoadFloat3(&m_displayChunk.GetVertex(i, j + 1).position);
+            const XMVECTOR v2 = XMLoadFloat3(&m_displayChunk.GetVertex(i + 1, j + 1).position);
+            const XMVECTOR v3 = XMLoadFloat3(&m_displayChunk.GetVertex(i + 1, j).position);
+
+            float triDist = 0.f;
+            if (DirectX::TriangleTests::Intersects(pickingRayOrigin, pickingRayDirection, v0, v1, v3, triDist))
+            {
+                if (triDist >= 0.f && triDist < closestDistance)
+                {
+                    XMStoreFloat3(&outHit, pickingRayOrigin + pickingRayDirection * triDist);
+                    hit = true;
+                }
+            }
+
+            if (DirectX::TriangleTests::Intersects(pickingRayOrigin, pickingRayDirection, v1, v2, v3, triDist))
+            {
+                if (triDist >= 0.f && triDist < closestDistance)
+                {
+                    XMStoreFloat3(&outHit, pickingRayOrigin + pickingRayDirection * triDist);
+                    hit = true;
+                }
+            }
+        }
+    }
+
+       
+    return hit;
+}
+
 // Updates the world.
 void Game::Update(DX::StepTimer const& timer)
 {
@@ -207,7 +272,7 @@ void Game::Update(DX::StepTimer const& timer)
     bool wasLMBReleased = m_lmbDownLastFrame == true && mouseState.leftButton == false;
     if (wasLMBReleased && !ImGui::IsAnyItemHovered() && !m_dialogHovered)
     {
-        if (!m_editingTerrain)
+        if (!m_editingTerrain && !m_editingSpline)
         {
             int selected = PickObjectUnderMouse();
             HandleObjectPicking(selected);
@@ -216,6 +281,15 @@ void Game::Update(DX::StepTimer const& timer)
         {
             std::shared_ptr<TerrainEditCommand> cmd = std::make_shared<TerrainEditCommand>(m_oldTerrainData, m_displayChunk.GetHeightMap());
             ExecuteCommand(cmd);
+        }
+        else if (m_editingSpline)
+        {
+            Vector3 hitPoint;
+            if (TraceAgainstTerrain(hitPoint))
+            {
+                std::shared_ptr<EditSplineCommand> cmd = std::make_shared<EditSplineCommand>(hitPoint);
+                ExecuteCommand(cmd);
+            }
         }
     }
     if (m_lmbDownLastFrame == false && mouseState.leftButton && m_editingTerrain)
@@ -370,6 +444,31 @@ void Game::Render()
     {
         auto context = m_deviceResources->GetD3DDeviceContext();
         context->OMSetBlendState(m_states->Opaque(), nullptr, 0xFF0000FF);
+        context->OMSetDepthStencilState(m_states->DepthNone(), 0);
+        context->RSSetState(m_states->CullNone());
+
+        m_debugEffect->Apply(context);
+        context->IASetInputLayout(m_debugInputLayout.Get());
+
+        m_debugBatch->Begin();
+
+        for (int i = 0; i < m_debugCircleVertices.size() - 1; ++i)
+        {
+            m_debugBatch->DrawLine(m_debugCircleVertices[i], m_debugCircleVertices[i + 1]);
+        }
+        if (m_debugCircleVertices.size() > 1) {
+            m_debugBatch->DrawLine(m_debugCircleVertices.back(), m_debugCircleVertices.front());
+        }
+
+
+        m_debugBatch->End();
+    }
+
+    std::vector<VertexPositionColor> splineVerts = m_Spline.GetSplinePoints();
+    if (!splineVerts.empty())
+    {
+        auto context = m_deviceResources->GetD3DDeviceContext();
+        context->OMSetBlendState(m_states->Opaque(), nullptr, 0xFFFFFFFF);
         context->OMSetDepthStencilState(m_states->DepthDefault(), 0);
         context->RSSetState(m_states->CullNone());
 
@@ -378,14 +477,56 @@ void Game::Render()
 
         m_debugBatch->Begin();
 
-        for (size_t i = 0; i < m_debugCircleVertices.size() - 1; ++i)
+        for (int i = 0; i < splineVerts.size() - 1; ++i)
         {
-            m_debugBatch->DrawLine(m_debugCircleVertices[i], m_debugCircleVertices[i + 1]);
-        }
-        if (m_debugCircleVertices.size() > 1) {
-            m_debugBatch->DrawLine(m_debugCircleVertices.back(), m_debugCircleVertices.front());
+            m_debugBatch->DrawLine(splineVerts[i], splineVerts[i + 1]);
         }
 
+        m_debugBatch->End();
+    }
+    
+    std::vector<Vector3> splineControlPoints = m_Spline.GetControlPoints();
+    if (!splineVerts.empty() && !splineControlPoints.empty())
+    {
+        auto context = m_deviceResources->GetD3DDeviceContext();
+        context->OMSetBlendState(m_states->Opaque(), nullptr, 0xFFFFFFFF);
+        context->OMSetDepthStencilState(m_states->DepthDefault(), 0);
+        context->RSSetState(m_states->CullNone());
+
+        m_debugEffect->Apply(context);
+        context->IASetInputLayout(m_debugInputLayout.Get());
+
+        m_debugBatch->Begin();
+
+        float size = 1.0f;
+        Vector3 verts[8] = {
+            Vector3(-size * 0.5f, -size * 0.5f, -size * 0.5f), Vector3(size * 0.5f, -size * 0.5f, -size * 0.5f),
+            Vector3(size * 0.5f,  size * 0.5f, -size * 0.5f), Vector3(-size * 0.5f,  size * 0.5f, -size * 0.5f),
+            Vector3(-size * 0.5f, -size * 0.5f,  size * 0.5f), Vector3(size * 0.5f, -size * 0.5f,  size * 0.5f),
+            Vector3(size * 0.5f,  size * 0.5f,  size * 0.5f), Vector3(-size * 0.5f,  size * 0.5f,  size * 0.5f)
+        };
+
+        VertexPositionColor baseCubeVertices[8];
+        for (int i = 0; i < splineControlPoints.size(); ++i)
+        {
+            for (int j = 0; j < 8; ++j) {
+                baseCubeVertices[j] = VertexPositionColor(verts[j] + splineControlPoints[i], Vector3(1.f, 1.f, 1.f));
+                baseCubeVertices[j].position.y += 1;
+            }
+
+            m_debugBatch->DrawTriangle(baseCubeVertices[0], baseCubeVertices[3], baseCubeVertices[2]);
+            m_debugBatch->DrawTriangle(baseCubeVertices[0], baseCubeVertices[2], baseCubeVertices[1]);
+            m_debugBatch->DrawTriangle(baseCubeVertices[5], baseCubeVertices[6], baseCubeVertices[7]);
+            m_debugBatch->DrawTriangle(baseCubeVertices[5], baseCubeVertices[7], baseCubeVertices[4]);
+            m_debugBatch->DrawTriangle(baseCubeVertices[3], baseCubeVertices[7], baseCubeVertices[6]);
+            m_debugBatch->DrawTriangle(baseCubeVertices[3], baseCubeVertices[6], baseCubeVertices[2]);
+            m_debugBatch->DrawTriangle(baseCubeVertices[4], baseCubeVertices[0], baseCubeVertices[1]);
+            m_debugBatch->DrawTriangle(baseCubeVertices[4], baseCubeVertices[1], baseCubeVertices[5]);
+            m_debugBatch->DrawTriangle(baseCubeVertices[4], baseCubeVertices[7], baseCubeVertices[3]);
+            m_debugBatch->DrawTriangle(baseCubeVertices[4], baseCubeVertices[3], baseCubeVertices[0]);
+            m_debugBatch->DrawTriangle(baseCubeVertices[1], baseCubeVertices[2], baseCubeVertices[6]);
+            m_debugBatch->DrawTriangle(baseCubeVertices[1], baseCubeVertices[6], baseCubeVertices[5]);
+        }
 
         m_debugBatch->End();
     }
@@ -923,73 +1064,8 @@ void Game::HandleObjectPicking(int selected)
 
 void Game::PickTerrainAndModify(bool modify)
 {
-    const RECT screenDimensions = m_deviceResources->GetOutputSize();
-    const DirectX::Mouse::State state = m_mouse->GetState();
-
-    const XMVECTOR nearSource = XMVectorSet(static_cast<float>(state.x), static_cast<float>(state.y), 0.f, 1.f);
-    const XMVECTOR farSource = XMVectorSet(static_cast<float>(state.x), static_cast<float>(state.y), 1.f, 1.f);
-    
-    const XMMATRIX viewMatrix = m_camera->GetViewMatrix();
-    const XMMATRIX projectionMatrix = m_projection;
-
-    const XMVECTOR nearPoint = XMVector3Unproject(
-        nearSource, 0.f, 0.f, static_cast<float>(screenDimensions.right), static_cast<float>(screenDimensions.bottom),
-        m_deviceResources->GetScreenViewport().MinDepth,
-        m_deviceResources->GetScreenViewport().MaxDepth,
-        projectionMatrix, viewMatrix, DirectX::XMMatrixIdentity() // Use Identity for world
-    );
-
-    const XMVECTOR farPoint = XMVector3Unproject(
-        farSource, 0.f, 0.f, static_cast<float>(screenDimensions.right), static_cast<float>(screenDimensions.bottom),
-        m_deviceResources->GetScreenViewport().MinDepth,
-        m_deviceResources->GetScreenViewport().MaxDepth,
-        projectionMatrix, viewMatrix, DirectX::XMMatrixIdentity() // Use Identity for world
-    );
-
-    const XMVECTOR pickingRayDirection = XMVector3Normalize(farPoint - nearPoint);
-    const XMVECTOR pickingRayOrigin = nearPoint;
-    
-    DirectX::SimpleMath::Vector3 hitPoint;
-    bool terrainHit = false;
-    float closestDistance = FLT_MAX;
-
-    for (int i = 0; i < TERRAINRESOLUTION - 1; ++i)
-    {
-        for (int j = 0; j < TERRAINRESOLUTION - 1; ++j)
-        {
-            const XMVECTOR v0 = XMLoadFloat3(&m_displayChunk.GetVertex(i, j).position);
-            const XMVECTOR v1 = XMLoadFloat3(&m_displayChunk.GetVertex(i, j + 1).position);
-            const XMVECTOR v2 = XMLoadFloat3(&m_displayChunk.GetVertex(i + 1, j + 1).position);
-            const XMVECTOR v3 = XMLoadFloat3(&m_displayChunk.GetVertex(i + 1, j).position);
-
-            float triDist = 0.f;
-            if (DirectX::TriangleTests::Intersects(pickingRayOrigin, pickingRayDirection, v0, v1, v3, triDist))
-            {
-                if (triDist >= 0.f && triDist < closestDistance)
-                {
-                    closestDistance = triDist;
-                    // Calculate the actual hit point in world space
-                    XMStoreFloat3(&hitPoint, pickingRayOrigin + pickingRayDirection * triDist);
-                    terrainHit = true;
-                    break;
-                }
-            }
-
-            if (DirectX::TriangleTests::Intersects(pickingRayOrigin, pickingRayDirection, v1, v2, v3, triDist))
-            {
-                if (triDist >= 0.f && triDist < closestDistance)
-                {
-                    closestDistance = triDist;
-                    // Calculate the actual hit point in world space
-                    XMStoreFloat3(&hitPoint, pickingRayOrigin + pickingRayDirection * triDist);
-                    terrainHit = true;
-                    break;
-                }
-            }
-        }
-    }
-
-    if (terrainHit)
+    Vector3 hitPoint;
+    if (TraceAgainstTerrain(hitPoint))
     {
         m_currentTerrainHit = hitPoint;
         UpdateTerrainDebugCircle();
@@ -1197,4 +1273,24 @@ void Game::AddToTerrainBrushSize(float delta)
     {
         m_terrainEditRadius = 50.f;
     }
+}
+
+void Game::AddPointToSpline(Vector3 point)
+{
+    m_Spline.AddPoint(point);
+}
+
+void Game::PopLastSplinePoint()
+{
+    m_Spline.PopPoint();
+}
+
+void Game::ToggleEditingSpline()
+{
+    m_editingSpline = !m_editingSpline;
+}
+
+void Game::AddToSplineQuality(int delta)
+{
+    m_Spline.AddToQuality(delta);
 }

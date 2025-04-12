@@ -305,9 +305,19 @@ void ToolMain::onToggleTerrainPainting()
 	m_d3dRenderer.ToggleTerrainPainting();
 }
 
+void ToolMain::onToggleSplineEditing()
+{
+	m_d3dRenderer.ToggleEditingSpline();
+}
+
 void ToolMain::addToTerrainBrushSize(float delta)
 {
 	m_d3dRenderer.AddToTerrainBrushSize(delta);
+}
+
+void ToolMain::addToSplineQuality(float delta)
+{
+	m_d3dRenderer.AddToSplineQuality(delta);
 }
 
 void ToolMain::TranslateSelected(float x, float y, float z)

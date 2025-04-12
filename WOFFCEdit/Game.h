@@ -14,6 +14,7 @@
 #include <vector>
 #include <memory>
 #include "Camera.h"
+#include "CatmullRomSpline.h"
 
 class Command;
 
@@ -66,7 +67,12 @@ public:
 	void SetTerrainHeightMap(const std::vector<BYTE>& newHeightMap);
 	void ToggleTerrainPainting();
 	void AddToTerrainBrushSize(float delta);
-	
+	void AddPointToSpline(Vector3 point);
+	void PopLastSplinePoint();
+
+	void ToggleEditingSpline();
+	void AddToSplineQuality(int delta);
+
 	//template <typename T = Command, typename ...Args>
 	void ExecuteCommand(std::shared_ptr<Command> command);
 	
@@ -82,6 +88,7 @@ public:
 
 private:
 
+	bool TraceAgainstTerrain(Vector3& outHit);
 	void Update(DX::StepTimer const& timer);
 	void UpdateHotkeys();
 	void CreateDeviceDependentResources();
@@ -166,6 +173,10 @@ private:
 	float m_terrainEditRadius = 15.f;
 	bool m_isHittingTerrain;
 	std::vector<DirectX::VertexPositionColor> m_debugCircleVertices;
+
+	/** Splines */
+	CatmullRomSpline m_Spline;
+	bool m_editingSpline = false;
 
 	std::unique_ptr<DirectX::PrimitiveBatch<DirectX::VertexPositionColor>> m_debugBatch;
 	std::unique_ptr<DirectX::BasicEffect> m_debugEffect;

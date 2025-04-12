@@ -102,6 +102,10 @@
     <ClCompile Include="TerrainEditCommand.cpp">
       <Filter>Command</Filter>
     </ClCompile>
+    <ClCompile Include="CatmullRomSpline.cpp" />
+    <ClCompile Include="EditSplineCommand.cpp">
+      <Filter>Command</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="DeviceResources.h">
@@ -186,6 +190,10 @@
       <Filter>MFC</Filter>
     </ClInclude>
     <ClInclude Include="TerrainEditCommand.h">
+      <Filter>Command</Filter>
+    </ClInclude>
+    <ClInclude Include="CatmullRomSpline.h" />
+    <ClInclude Include="EditSplineCommand.h">
       <Filter>Command</Filter>
     </ClInclude>
   </ItemGroup>
