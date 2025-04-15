@@ -17,13 +17,24 @@ public:
 	const std::vector<DirectX::VertexPositionColor>& GetSplinePoints();
 	const std::vector<Vector3>& GetControlPoints();
 
+	Vector3 GetLocationAtTime(float t);
+	Vector3 GetTangentAtTime(float t);
+
+	float GetLength() const;
+
 private:
 
 	void RecalculateSpline();
+	void ComputeLength();
 
 private:
 	std::vector<Vector3> m_controlPoints;
 	std::vector<DirectX::VertexPositionColor> m_splinePoints;
-	int m_pointsPerSegment = 4;
+	std::vector<float> m_segmentLengths;
+	std::vector<float> m_accumulatedLengths;
+	int m_pointsPerSegment = 10;
+	float m_length = 0.f;
+
+
 	static constexpr float tension = 1.f;
 };

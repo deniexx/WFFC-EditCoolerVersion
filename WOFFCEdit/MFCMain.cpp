@@ -3,15 +3,16 @@
 
 
 BEGIN_MESSAGE_MAP(MFCMain, CWinApp)
-	ON_COMMAND(ID_FILE_QUIT,	&MFCMain::MenuFileQuit)
+	ON_COMMAND(ID_FILE_QUIT, &MFCMain::MenuFileQuit)
 	ON_COMMAND(ID_FILE_SAVETERRAIN, &MFCMain::MenuFileSaveTerrain)
 	ON_COMMAND(ID_EDIT_SELECT, &MFCMain::MenuEditSelect)
-	ON_COMMAND(ID_BUTTON40001,	&MFCMain::ToggleTerrainPainting)
-	ON_COMMAND(ID_BUTTON40009,	&MFCMain::IncreaseTerrainBrushSize)
-	ON_COMMAND(ID_BUTTON40010,	&MFCMain::DecreaseTerrainBrushSize)
+	ON_COMMAND(ID_BUTTON40001, &MFCMain::ToggleTerrainPainting)
+	ON_COMMAND(ID_BUTTON40009, &MFCMain::IncreaseTerrainBrushSize)
+	ON_COMMAND(ID_BUTTON40010, &MFCMain::DecreaseTerrainBrushSize)
 	ON_COMMAND(ID_BUTTON40017, &MFCMain::ToggleSplineEditing)
 	ON_COMMAND(ID_BUTTON40019, &MFCMain::IncreaseSplineQuality)
 	ON_COMMAND(ID_BUTTON40020, &MFCMain::DecreaseSplineQuality)
+	ON_COMMAND(ID_BUTTON40021, &MFCMain::ToggleAnimateMinecart)
 	ON_COMMAND(ID_EDIT_UNDO, &MFCMain::UndoButton)
 	ON_COMMAND(ID_EDIT_REDO, &MFCMain::RedoButton)
 	ON_COMMAND(ID_EDIT_TOGGLETERRAINPAINTING, &MFCMain::ToggleTerrainPainting)
@@ -176,6 +177,11 @@ void MFCMain::IncreaseSplineQuality()
 void MFCMain::DecreaseSplineQuality()
 {
 	m_ToolSystem.addToSplineQuality(-1.f);
+}
+
+void MFCMain::ToggleAnimateMinecart()
+{
+	m_ToolSystem.onToggleAnimateMinecart();
 }
 
 MFCMain::MFCMain()

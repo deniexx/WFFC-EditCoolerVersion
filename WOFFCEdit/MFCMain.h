@@ -45,6 +45,7 @@ private:
 	afx_msg void ToggleSplineEditing();
 	afx_msg void IncreaseSplineQuality();
 	afx_msg void DecreaseSplineQuality();
+	afx_msg void ToggleAnimateMinecart();
 
 
 	DECLARE_MESSAGE_MAP()	// required macro for message map functionality  One per class

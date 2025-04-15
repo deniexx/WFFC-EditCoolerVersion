@@ -320,6 +320,11 @@ void ToolMain::addToSplineQuality(float delta)
 	m_d3dRenderer.AddToSplineQuality(delta);
 }
 
+void ToolMain::onToggleAnimateMinecart()
+{
+	m_d3dRenderer.ToggleAnimateMinecart();
+}
+
 void ToolMain::TranslateSelected(float x, float y, float z)
 {
 	int objectIndex = m_d3dRenderer.GetPickedObjects()[m_d3dRenderer.GetPickedObjects().size() - 1];
@@ -447,7 +452,6 @@ void ToolMain::UpdateInput(MSG * msg)
 	case WM_MOUSEHOVER:
 		DirectX::Mouse::ProcessMessage(msg->message, msg->wParam, msg->lParam);
 		break;
-
 	}
 
 	//here we update all the actual app functionality that we want.  This information will either be used int toolmain, or sent down to the renderer (Camera movement etc

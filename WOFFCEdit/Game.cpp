@@ -67,6 +67,8 @@ void Game::Initialize(HWND window, int width, int height)
     m_deviceResources->CreateDeviceResources();
     CreateDeviceDependentResources();
 
+    m_minecartMatrix = XMMatrixIdentity();
+
     m_deviceResources->CreateWindowSizeDependentResources();
     CreateWindowSizeDependentResources();
 
@@ -272,7 +274,7 @@ void Game::Update(DX::StepTimer const& timer)
     bool wasLMBReleased = m_lmbDownLastFrame == true && mouseState.leftButton == false;
     if (wasLMBReleased && !ImGui::IsAnyItemHovered() && !m_dialogHovered)
     {
-        if (!m_editingTerrain && !m_editingSpline)
+        if (!m_editingTerrain && !m_editingSpline && mouseState.y > 10)
         {
             int selected = PickObjectUnderMouse();
             HandleObjectPicking(selected);
@@ -282,7 +284,7 @@ void Game::Update(DX::StepTimer const& timer)
             std::shared_ptr<TerrainEditCommand> cmd = std::make_shared<TerrainEditCommand>(m_oldTerrainData, m_displayChunk.GetHeightMap());
             ExecuteCommand(cmd);
         }
-        else if (m_editingSpline)
+        else if (m_editingSpline && mouseState.y > 10)
         {
             Vector3 hitPoint;
             if (TraceAgainstTerrain(hitPoint))
@@ -292,11 +294,11 @@ void Game::Update(DX::StepTimer const& timer)
             }
         }
     }
-    if (m_lmbDownLastFrame == false && mouseState.leftButton && m_editingTerrain)
+    if (m_lmbDownLastFrame == false && mouseState.leftButton && m_editingTerrain && mouseState.y > 10)
     {
         m_oldTerrainData = m_displayChunk.GetHeightMap();
     }
-    if (m_editingTerrain && !ImGui::IsAnyItemHovered() && !m_dialogHovered)
+    if (m_editingTerrain && !ImGui::IsAnyItemHovered() && !m_dialogHovered && mouseState.y > 10)
     {
         PickTerrainAndModify(mouseState.leftButton);
     }
@@ -321,6 +323,11 @@ void Game::Update(DX::StepTimer const& timer)
 
     m_lastMouse = Vector3(mouseState.x, mouseState.y, 0.f);
     UpdateHotkeys();
+
+    if (m_animatingMinecart)
+    {
+        UpdateMinecartPosition();
+    }
 
 #ifdef DXTK_AUDIO
     m_audioTimerAcc -= (float)timer.GetElapsedSeconds();
@@ -426,9 +433,10 @@ void Game::Render()
             );
         }
 		m_displayList[i].m_model->Draw(context, *m_states, local, m_camera->GetViewMatrix(), m_projection, false);	//last variable in draw,  make TRUE for wireframe
-
 		m_deviceResources->PIXEndEvent();
 	}
+
+    m_minecartModel->Draw(context, *m_states, m_minecartMatrix, m_camera->GetViewMatrix(), m_projection, false);
     m_deviceResources->PIXEndEvent();
 
 	//RENDER TERRAIN
@@ -440,30 +448,126 @@ void Game::Render()
 	//Render the batch,  This is handled in the Display chunk becuase it has the potential to get complex
 	m_displayChunk.RenderBatch(m_deviceResources);
 
-    if (!m_debugCircleVertices.empty())
-    {
-        auto context = m_deviceResources->GetD3DDeviceContext();
-        context->OMSetBlendState(m_states->Opaque(), nullptr, 0xFF0000FF);
-        context->OMSetDepthStencilState(m_states->DepthNone(), 0);
-        context->RSSetState(m_states->CullNone());
+    DrawCircle();
+    DrawSpline();
+    DrawSplineMesh();
 
-        m_debugEffect->Apply(context);
-        context->IASetInputLayout(m_debugInputLayout.Get());
+    DirectX::Mouse::State mouseState = m_mouse->GetState();
+    DrawImGui();
+    m_deviceResources->Present();
+}
 
-        m_debugBatch->Begin();
-
-        for (int i = 0; i < m_debugCircleVertices.size() - 1; ++i)
-        {
-            m_debugBatch->DrawLine(m_debugCircleVertices[i], m_debugCircleVertices[i + 1]);
-        }
-        if (m_debugCircleVertices.size() > 1) {
-            m_debugBatch->DrawLine(m_debugCircleVertices.back(), m_debugCircleVertices.front());
-        }
-
-
-        m_debugBatch->End();
+void Game::DrawSplineMesh()
+{
+    const auto& splinePoints = m_Spline.GetSplinePoints();
+    if (splinePoints.size() < 2) {
+        return;
     }
 
+    auto context = m_deviceResources->GetD3DDeviceContext();
+    context->OMSetBlendState(m_states->Opaque(), nullptr, 0xFF0000FF);
+    context->OMSetDepthStencilState(m_states->DepthDefault(), 0);
+    context->RSSetState(m_states->CullNone());
+
+    m_splineEffect->SetWorld(Matrix::Identity);
+    m_splineEffect->SetView(m_camera->GetViewMatrix());
+    m_splineEffect->SetProjection(m_projection);
+    ID3D11SamplerState* samplers[] = { m_states->LinearWrap() };
+    context->PSSetSamplers(0, 1, samplers);
+
+    m_splineEffect->Apply(context);
+    context->IASetInputLayout(m_splineInputLayout.Get());
+
+    m_splineMeshBatch->Begin();
+    const Vector3 globalUp = Vector3::Up;
+    Vector3 lastBinormal = Vector3::Zero;
+
+    for (size_t i = 0; i < splinePoints.size() - 1; ++i)
+    {
+        const Vector3 p0 = splinePoints[i].position;
+        const Vector3 p1 = splinePoints[i + 1].position;
+
+        Vector3 tangent = p1 - p0;
+        float segmentLength = tangent.Length();
+
+        if (segmentLength < std::numeric_limits<float>::epsilon())
+        {
+            if (lastBinormal == Vector3::Zero)
+            {
+                continue;
+            }
+            tangent = Vector3::Forward;
+        }
+        else
+        {
+            tangent /= segmentLength;
+        }
+
+        Vector3 binormal;
+        float dotUpTangent = abs(tangent.Dot(globalUp));
+
+        if (dotUpTangent > 0.999f)
+        {
+            if (lastBinormal != Vector3::Zero)
+            {
+                binormal = lastBinormal;
+            }
+            else
+            {
+                Vector3 tempUp = Vector3::Right; // (1, 0, 0)
+                binormal = tangent.Cross(tempUp);
+
+                if (binormal.LengthSquared() < std::numeric_limits<float>::epsilon())
+                {
+                    tempUp = Vector3::Forward; // (0, 0, 1)
+                    binormal = tangent.Cross(tempUp);
+                }
+            }
+        }
+        else
+        {
+            binormal = tangent.Cross(globalUp);
+        }
+
+        if (binormal.LengthSquared() > std::numeric_limits<float>::epsilon())
+        {
+            binormal.Normalize();
+            lastBinormal = binormal;
+        }
+        else if (lastBinormal != Vector3::Zero)
+        {
+            binormal = lastBinormal;
+        }
+        else
+        {
+            Vector3 tempUp = (abs(tangent.Dot(Vector3::Right)) < 0.99f) ? Vector3::Right : Vector3::Forward;
+            binormal = tangent.Cross(tempUp);
+            if (binormal.LengthSquared() > std::numeric_limits<float>::epsilon()) binormal.Normalize();
+            else binormal = Vector3::Right;
+            lastBinormal = binormal;
+        }
+
+        Vector3 offset = binormal * (m_ribbonWidth * 0.5f);
+
+        Vector3 v0_pos = p0 - offset;
+        Vector3 v1_pos = p0 + offset;
+        Vector3 v2_pos = p1 + offset;
+        Vector3 v3_pos = p1 - offset;
+
+        VertexPositionColorTexture vert0(v0_pos, Colors::White, Vector2(0.f, 0.f));
+        VertexPositionColorTexture vert1(v1_pos, Colors::White, Vector2(1.f, 0.f));
+        VertexPositionColorTexture vert2(v2_pos, Colors::White, Vector2(1.f, 1.f));
+        VertexPositionColorTexture vert3(v3_pos, Colors::White, Vector2(0.f, 1.f));
+
+        m_splineMeshBatch->DrawTriangle(vert0, vert1, vert2);
+        m_splineMeshBatch->DrawTriangle(vert0, vert2, vert3);
+    }
+
+    m_splineMeshBatch->End();
+}
+
+void Game::DrawSpline()
+{
     std::vector<VertexPositionColor> splineVerts = m_Spline.GetSplinePoints();
     if (!splineVerts.empty())
     {
@@ -484,7 +588,7 @@ void Game::Render()
 
         m_debugBatch->End();
     }
-    
+
     std::vector<Vector3> splineControlPoints = m_Spline.GetControlPoints();
     if (!splineVerts.empty() && !splineControlPoints.empty())
     {
@@ -509,7 +613,8 @@ void Game::Render()
         VertexPositionColor baseCubeVertices[8];
         for (int i = 0; i < splineControlPoints.size(); ++i)
         {
-            for (int j = 0; j < 8; ++j) {
+            for (int j = 0; j < 8; ++j)
+            {
                 baseCubeVertices[j] = VertexPositionColor(verts[j] + splineControlPoints[i], Vector3(1.f, 1.f, 1.f));
                 baseCubeVertices[j].position.y += 1;
             }
@@ -530,10 +635,33 @@ void Game::Render()
 
         m_debugBatch->End();
     }
+}
 
-    DirectX::Mouse::State mouseState = m_mouse->GetState();
-    DrawImGui();
-    m_deviceResources->Present();
+void Game::DrawCircle()
+{
+    if (!m_debugCircleVertices.empty())
+    {
+        auto context = m_deviceResources->GetD3DDeviceContext();
+        context->OMSetBlendState(m_states->Opaque(), nullptr, 0xFF0000FF);
+        context->OMSetDepthStencilState(m_states->DepthNone(), 0);
+        context->RSSetState(m_states->CullNone());
+
+        m_debugEffect->Apply(context);
+        context->IASetInputLayout(m_debugInputLayout.Get());
+
+        m_debugBatch->Begin();
+
+        for (int i = 0; i < m_debugCircleVertices.size() - 1; ++i)
+        {
+            m_debugBatch->DrawLine(m_debugCircleVertices[i], m_debugCircleVertices[i + 1]);
+        }
+        if (m_debugCircleVertices.size() > 1) {
+            m_debugBatch->DrawLine(m_debugCircleVertices.back(), m_debugCircleVertices.front());
+        }
+
+
+        m_debugBatch->End();
+    }
 }
 
 // Helper method to clear the back buffers.
@@ -874,6 +1002,11 @@ void Game::CreateDeviceDependentResources()
     m_debugEffect = std::make_unique<BasicEffect>(device);
     m_debugEffect->SetVertexColorEnabled(true);
 
+    m_splineMeshBatch = std::make_unique<PrimitiveBatch<VertexPositionColorTexture>>(m_deviceResources->GetD3DDeviceContext());
+    m_splineEffect = std::make_unique<BasicEffect>(device);
+    m_splineEffect->SetTextureEnabled(true);
+    m_splineEffect->SetVertexColorEnabled(true);
+
     {
         void const* shaderByteCode;
         size_t byteCodeLength;
@@ -895,6 +1028,15 @@ void Game::CreateDeviceDependentResources()
                 shaderByteCode, byteCodeLength,
                 m_debugInputLayout.ReleaseAndGetAddressOf())
         );
+
+        m_splineEffect->GetVertexShaderBytecode(&shaderByteCode, &byteCodeLength);
+
+        DX::ThrowIfFailed(
+            device->CreateInputLayout(VertexPositionColorTexture::InputElements,
+                VertexPositionColorTexture::InputElementCount,
+                shaderByteCode, byteCodeLength,
+                m_splineInputLayout.ReleaseAndGetAddressOf())
+        );
     }
 
     m_font = std::make_unique<SpriteFont>(device, L"SegoeUI_18.spritefont");
@@ -903,7 +1045,7 @@ void Game::CreateDeviceDependentResources()
 
     // SDKMESH has to use clockwise winding with right-handed coordinates, so textures are flipped in U
     m_model = Model::CreateFromSDKMESH(device, L"tiny.sdkmesh", *m_fxFactory);
-	
+    m_minecartModel = Model::CreateFromSDKMESH(device, L"minecart.sdkmesh", *m_fxFactory);
 
     // Load textures
     DX::ThrowIfFailed(
@@ -914,6 +1056,11 @@ void Game::CreateDeviceDependentResources()
         CreateDDSTextureFromFile(device, L"windowslogo.dds", nullptr, m_texture2.ReleaseAndGetAddressOf())
     );
 
+    DX::ThrowIfFailed(
+        CreateDDSTextureFromFile(device, L"rail.dds", nullptr, m_railTexture.ReleaseAndGetAddressOf())
+    );
+
+    m_splineEffect->SetTexture(m_railTexture.Get());
 }
 
 // Allocate all memory resources that change on a window SizeChanged event.
@@ -1146,6 +1293,11 @@ void Game::OnDialogClosed()
 }
 #pragma endregion
 
+int sign(int value)
+{
+    return (0 < value) - (value < 0);
+}
+
 std::wstring StringToWCHART(std::string s)
 {
 
@@ -1252,8 +1404,7 @@ void Game::DrawHierarchy()
             }
             ImGui::Unindent();
         }
-        ImGui::Unindent();
-            
+        ImGui::Unindent();    
     }
 }
 
@@ -1283,6 +1434,73 @@ void Game::AddPointToSpline(Vector3 point)
 void Game::PopLastSplinePoint()
 {
     m_Spline.PopPoint();
+}
+
+void Game::UpdateMinecartPosition()
+{
+    const float deltaTime = (float)m_timer.GetElapsedSeconds();
+
+    if (m_Spline.GetLength() > 0.f) 
+    {
+        float acceleration = !m_goingBack ? m_minecartAcceleration : -m_minecartAcceleration;
+        m_minecartSpeed += (acceleration * deltaTime);
+        if (abs(m_minecartSpeed) > m_minecartMaxSpeed)
+        {
+            m_minecartSpeed = sign(m_minecartSpeed) * m_minecartMaxSpeed;
+        }
+
+        m_splineTime += (m_minecartSpeed / m_Spline.GetLength()) * deltaTime;
+
+        if (m_splineTime > 1.0f)
+        {
+            m_splineTime = 1.f;
+            m_goingBack = true;
+            m_minecartSpeed = 0.f;
+        }
+        else if (m_splineTime < 0.f)
+        {
+            m_splineTime = 0.f;
+            m_goingBack = false;
+            m_minecartSpeed = 0.f;
+        }
+    }
+    else 
+    {
+        m_splineTime = 0.f;
+    }
+
+    Vector3 currentPosition = m_Spline.GetLocationAtTime(m_splineTime);
+    currentPosition.y += 1;
+    Vector3 currentTangent = m_Spline.GetTangentAtTime(m_splineTime);
+
+    Vector3 modelUp = Vector3::Up;
+
+    if (currentTangent.LengthSquared() < std::numeric_limits<float>::epsilon()) 
+    {
+        currentTangent = Vector3::Forward;
+    }
+    currentTangent.Normalize();
+
+    Vector3 forward = currentTangent;
+    Vector3 right = modelUp.Cross(forward);
+
+    if (right.LengthSquared() < 0.0001f) 
+    {
+        right = Vector3::Right.Cross(forward);
+    }
+    right.Normalize();
+
+    Vector3 up = forward.Cross(right);
+    m_minecartMatrix = Matrix::CreateWorld(currentPosition, right, up);
+}
+
+void Game::ToggleAnimateMinecart()
+{
+    m_animatingMinecart = !m_animatingMinecart;
+    if (!m_animatingMinecart)
+    {
+        m_minecartMatrix = XMMatrixIdentity();
+    }
 }
 
 void Game::ToggleEditingSpline()
