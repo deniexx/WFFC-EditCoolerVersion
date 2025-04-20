@@ -36,6 +36,7 @@ void TransformDialog::End()
 
 void TransformDialog::Translate()
 {
+	// Crazy hacky, intended stop unnecessary flooding of the Undo/Redo buffer
 	if (numberOfChanges < 9)
 	{
 		numberOfChanges++;
@@ -57,6 +58,7 @@ void TransformDialog::Translate()
 
 void TransformDialog::Rotate()
 {
+	// Crazy hacky, intended stop unnecessary flooding of the Undo/Redo buffer
 	if (numberOfChanges < 9)
 	{
 		numberOfChanges++;
@@ -78,6 +80,7 @@ void TransformDialog::Rotate()
 
 void TransformDialog::Scale()
 {
+	// Crazy hacky, intended stop unnecessary flooding of the Undo/Redo buffer
 	if (numberOfChanges < 9)
 	{
 		numberOfChanges++;

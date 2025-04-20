@@ -55,6 +55,7 @@ Vector3 CatmullRomSpline::GetLocationAtTime(float t)
 		return m_splinePoints.back().position;
 	}
 
+	// Find the segment containing the target distance
 	float targetDistance = t * m_length;
 	int segmentIndex = 0;
 	for (int i = 1; i < m_accumulatedLengths.size(); ++i) 
@@ -64,11 +65,13 @@ Vector3 CatmullRomSpline::GetLocationAtTime(float t)
 			break;
 		}
 	}
-
+	
+	// Interpolate within the segment
 	float segmentStartDistance = m_accumulatedLengths[segmentIndex];
 	float segmentLength = m_segmentLengths[segmentIndex];
 
-	if (segmentLength < std::numeric_limits<float>::epsilon()) 
+	// If it has 0 length, just return the start point
+	if (segmentLength < 0.0001f) 
 	{
 		return (m_splinePoints[segmentIndex].position);
 	}
@@ -90,8 +93,10 @@ Vector3 CatmullRomSpline::GetTangentAtTime(float t)
 		return Vector3::Forward;
 	}
 	
+	// Clamping to avoid going out of bounds
 	t = std::max(0.f, std::min(1.f, t));
 
+	// Find containing segment
 	float targetDistance = t * m_length;
 	int segmentIndex = 0;
 	for (int i = 1; i < m_accumulatedLengths.size(); ++i)
@@ -106,10 +111,13 @@ Vector3 CatmullRomSpline::GetTangentAtTime(float t)
 			break;
 		}
 	}
+
+	// Find direction of segment
 	Vector3 tangent = (Vector3)m_splinePoints[segmentIndex + 1].position - (Vector3)m_splinePoints[segmentIndex].position;
 	tangent.Normalize();
 
-	if (tangent.LengthSquared() < std::numeric_limits<float>::epsilon()) 
+	// Handling edge cases
+	if (tangent.LengthSquared() < 0.0001f)
 	{
 		if (segmentIndex > 0) 
 		{
@@ -125,10 +133,11 @@ Vector3 CatmullRomSpline::GetTangentAtTime(float t)
 		{
 			tangent = Vector3::Forward;
 		}
-		if (tangent.LengthSquared() < std::numeric_limits<float>::epsilon()) {
+		if (tangent.LengthSquared() < 0.0001f) {
 			tangent = Vector3::Forward;
 		}
 	}
+
 	return tangent;
 }
 
@@ -139,8 +148,15 @@ float CatmullRomSpline::GetLength() const
 
 void CatmullRomSpline::RecalculateSpline()
 {
+	// Resolve undo crash
+	if (m_controlPoints.empty())
+	{
+		return;
+	}
+
 	m_splinePoints.clear();
 
+	// Go through all controil points, and generate spline points between them using the CatmullRom function
 	auto controlPointsAmount = m_controlPoints.size();
     for (int i = 0; i < controlPointsAmount - 1; i++)
     {
@@ -166,18 +182,20 @@ void CatmullRomSpline::ComputeLength()
 	m_length = 0.f;
 	m_segmentLengths.clear();
 	m_accumulatedLengths.clear();
+
+	// Must have at least 2 control points
 	if (m_controlPoints.size() < 2) return;
 	if (m_splinePoints.size() < 2) return;
 
 	m_segmentLengths.reserve(m_splinePoints.size() - 1);
 	m_accumulatedLengths.reserve(m_splinePoints.size());
-	m_accumulatedLengths.push_back(0.f);
+	m_accumulatedLengths.push_back(0.f); // Starting distance is 0
 
 	for (int i = 0; i < m_splinePoints.size() - 1; ++i) 
 	{
 		float len = Vector3::Distance(m_splinePoints[i].position, m_splinePoints[i + 1].position);
 		
-		if (len < std::numeric_limits<float>::epsilon()) 
+		if (len < 0.0001f)
 		{
 			len = 0.f;
 		}

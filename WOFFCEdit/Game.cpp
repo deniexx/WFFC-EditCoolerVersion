@@ -132,6 +132,7 @@ void Game::Tick(InputCommands *Input)
 
 bool Game::TraceAgainstTerrain(Vector3& outHit)
 {
+    // Most from the mouse picking
     const RECT screenDimensions = m_deviceResources->GetOutputSize();
     const DirectX::Mouse::State state = m_mouse->GetState();
 
@@ -160,6 +161,7 @@ bool Game::TraceAgainstTerrain(Vector3& outHit)
     float closestDistance = 99999999.f;
     bool hit = false;
 
+    // Iterate through veritces and perform a triangle hit test
     for (int i = 0; i < TERRAINRESOLUTION - 1; ++i)
     {
         for (int j = 0; j < TERRAINRESOLUTION - 1; ++j)
@@ -175,6 +177,7 @@ bool Game::TraceAgainstTerrain(Vector3& outHit)
                 if (triDist >= 0.f && triDist < closestDistance)
                 {
                     XMStoreFloat3(&outHit, pickingRayOrigin + pickingRayDirection * triDist);
+                    closestDistance = triDist;
                     hit = true;
                 }
             }
@@ -184,12 +187,12 @@ bool Game::TraceAgainstTerrain(Vector3& outHit)
                 if (triDist >= 0.f && triDist < closestDistance)
                 {
                     XMStoreFloat3(&outHit, pickingRayOrigin + pickingRayDirection * triDist);
+                    closestDistance = triDist;
                     hit = true;
                 }
             }
         }
     }
-
        
     return hit;
 }
@@ -201,14 +204,14 @@ void Game::Update(DX::StepTimer const& timer)
 	//camera motion is on a plane, so kill the 7 component of the look direction
     Mouse::State mouseState = m_mouse->GetState();
 
-    if (mouseState.rightButton)
+    if (mouseState.rightButton) // if we are holding the right button, update camera
     {
         RECT rect;
         GetWindowRect(m_hwnd, &rect);
         float middleX = (rect.right - rect.left) / 2.f + rect.left;
         float middleY = (rect.bottom - rect.top) / 2.f + rect.top;
 
-        if (!m_rmbDownLastFrame)
+        if (!m_rmbDownLastFrame) // we have just pressed the right click, so hide cursor and move it to the center
         {
             SetCursor(NULL);
             SetCursorPos(middleX, middleY);
@@ -217,7 +220,7 @@ void Game::Update(DX::StepTimer const& timer)
         POINT point;
         GetCursorPos(&point);
         Vector3 mouseDelta = Vector3::Zero;
-        if (m_rmbDownLastFrame)
+        if (m_rmbDownLastFrame) // We have been holding the right button, update camera
         {
             float diffX = point.x - middleX;
             float diffY = point.y - middleY;
@@ -226,12 +229,9 @@ void Game::Update(DX::StepTimer const& timer)
         SetCursorPos(middleX, middleY);
         m_camera->AddMouseInput(mouseDelta);
     }
-    else
+    else if (m_rmbDownLastFrame) // Show cursor as we have just released the right click
     {
-        if (m_rmbDownLastFrame)
-        {
-            SetCursor(m_cursor);
-        }
+        SetCursor(m_cursor);
     }
     if (m_InputCommands->plusDown)
     {
@@ -270,21 +270,21 @@ void Game::Update(DX::StepTimer const& timer)
         m_InputCommands->tDown = false;
         ToggleTerrainPainting();
     }
-
     bool wasLMBReleased = m_lmbDownLastFrame == true && mouseState.leftButton == false;
     if (wasLMBReleased && !ImGui::IsAnyItemHovered() && !m_dialogHovered)
     {
+        // If we are not editing terrain or editing spline and our mouse is not within MFC toolbar, pick object
         if (!m_editingTerrain && !m_editingSpline && mouseState.y > 10)
         {
             int selected = PickObjectUnderMouse();
             HandleObjectPicking(selected);
         }
-        else if (m_editingTerrain)
+        else if (m_editingTerrain) // Edit terrain
         {
             std::shared_ptr<TerrainEditCommand> cmd = std::make_shared<TerrainEditCommand>(m_oldTerrainData, m_displayChunk.GetHeightMap());
             ExecuteCommand(cmd);
         }
-        else if (m_editingSpline && mouseState.y > 10)
+        else if (m_editingSpline && mouseState.y > 10) // Add spline points
         {
             Vector3 hitPoint;
             if (TraceAgainstTerrain(hitPoint))
@@ -294,11 +294,11 @@ void Game::Update(DX::StepTimer const& timer)
             }
         }
     }
-    if (m_lmbDownLastFrame == false && mouseState.leftButton && m_editingTerrain && mouseState.y > 10)
+    if (m_lmbDownLastFrame == false && mouseState.leftButton && m_editingTerrain && mouseState.y > 10) // If we have just finished editing the terrain
     {
         m_oldTerrainData = m_displayChunk.GetHeightMap();
     }
-    if (m_editingTerrain && !ImGui::IsAnyItemHovered() && !m_dialogHovered && mouseState.y > 10)
+    if (m_editingTerrain && !ImGui::IsAnyItemHovered() && !m_dialogHovered && mouseState.y > 10) // currently editing terrain
     {
         PickTerrainAndModify(mouseState.leftButton);
     }
@@ -459,11 +459,13 @@ void Game::Render()
 
 void Game::DrawSplineMesh()
 {
+    // Very messy function, but draws the mesh around the spline points
     const auto& splinePoints = m_Spline.GetSplinePoints();
     if (splinePoints.size() < 2) {
         return;
     }
 
+    // Setup
     auto context = m_deviceResources->GetD3DDeviceContext();
     context->OMSetBlendState(m_states->Opaque(), nullptr, 0xFF0000FF);
     context->OMSetDepthStencilState(m_states->DepthDefault(), 0);
@@ -490,8 +492,9 @@ void Game::DrawSplineMesh()
         Vector3 tangent = p1 - p0;
         float segmentLength = tangent.Length();
 
-        if (segmentLength < std::numeric_limits<float>::epsilon())
+        if (segmentLength < 0.0001f)
         {
+            // Skip 0 length segment with no last binormal
             if (lastBinormal == Vector3::Zero)
             {
                 continue;
@@ -500,12 +503,13 @@ void Game::DrawSplineMesh()
         }
         else
         {
-            tangent /= segmentLength;
+            tangent /= segmentLength; // Normalize
         }
 
         Vector3 binormal;
         float dotUpTangent = abs(tangent.Dot(globalUp));
 
+        // Making sure that lastBinormal is correctly calculated with some fallbacks
         if (dotUpTangent > 0.999f)
         {
             if (lastBinormal != Vector3::Zero)
@@ -514,12 +518,12 @@ void Game::DrawSplineMesh()
             }
             else
             {
-                Vector3 tempUp = Vector3::Right; // (1, 0, 0)
+                Vector3 tempUp = Vector3::Right;
                 binormal = tangent.Cross(tempUp);
 
-                if (binormal.LengthSquared() < std::numeric_limits<float>::epsilon())
+                if (binormal.LengthSquared() < 0.0001f)
                 {
-                    tempUp = Vector3::Forward; // (0, 0, 1)
+                    tempUp = Vector3::Forward;
                     binormal = tangent.Cross(tempUp);
                 }
             }
@@ -529,7 +533,8 @@ void Game::DrawSplineMesh()
             binormal = tangent.Cross(globalUp);
         }
 
-        if (binormal.LengthSquared() > std::numeric_limits<float>::epsilon())
+        // Store the binormal, with some fallbacks, like Cross being zero
+        if (binormal.LengthSquared() > 0.0001f)
         {
             binormal.Normalize();
             lastBinormal = binormal;
@@ -540,13 +545,23 @@ void Game::DrawSplineMesh()
         }
         else
         {
+            // Here we guess a right vector relative to the tangent
             Vector3 tempUp = (abs(tangent.Dot(Vector3::Right)) < 0.99f) ? Vector3::Right : Vector3::Forward;
             binormal = tangent.Cross(tempUp);
-            if (binormal.LengthSquared() > std::numeric_limits<float>::epsilon()) binormal.Normalize();
-            else binormal = Vector3::Right;
+            if (binormal.LengthSquared() > 0.0001f)
+            {
+                binormal.Normalize();
+            }
+            else
+            {
+                // If all else fails, guess again, very HACKY but it works
+                binormal = Vector3::Right;
+            }
+
             lastBinormal = binormal;
         }
 
+        // Make quad and draw it
         Vector3 offset = binormal * (m_ribbonWidth * 0.5f);
 
         Vector3 v0_pos = p0 - offset;
@@ -568,6 +583,7 @@ void Game::DrawSplineMesh()
 
 void Game::DrawSpline()
 {
+    // Just draw lines between the spline points
     std::vector<VertexPositionColor> splineVerts = m_Spline.GetSplinePoints();
     if (!splineVerts.empty())
     {
@@ -589,6 +605,7 @@ void Game::DrawSpline()
         m_debugBatch->End();
     }
 
+    // Get the control points and draw a cube at that location
     std::vector<Vector3> splineControlPoints = m_Spline.GetControlPoints();
     if (!splineVerts.empty() && !splineControlPoints.empty())
     {
@@ -866,21 +883,6 @@ void Game::SaveDisplayChunk(ChunkObject * SceneChunk)
 	m_displayChunk.SaveHeightMap();			//save map to file.
 }
 
-//template<typename T, typename ...Args>
-//void Game::ExecuteCommand(Args... args)
-//{
-//    std::shared_ptr<T> command = std::make_shared<T>(args...);
-//
-//    command->Execute(this);
-//    m_undoStack.push_back(command);
-//    m_redoStack.clear();
-//
-//    if (m_undoStack.size() > 30)
-//    {
-//        m_undoStack.erase(m_undoStack.begin());
-//    }
-//}
-
 void Game::ExecuteCommand(std::shared_ptr<Command> command)
 {
     command->Execute(this);
@@ -1093,6 +1095,7 @@ void Game::CreateWindowSizeDependentResources()
 
 int Game::PickObjectUnderMouse()
 {
+    // From the lecture mostly
     int selectedID = -1;
     float pickedDistance = 9999999.f;
 
@@ -1162,6 +1165,7 @@ int Game::PickObjectUnderMouse()
 
 void Game::HandleObjectPicking(int selected)
 {
+    // Are we using multiselect
     if (m_InputCommands->shiftDown)
     {
         if (selected == -1)
@@ -1183,6 +1187,7 @@ void Game::HandleObjectPicking(int selected)
     }
     else
     {
+        // Remove all elements if clicked on nothing
         if (selected == -1)
         {
             std::shared_ptr<SelectionCommand> command = std::make_shared<SelectionCommand>(selected, SelectionType::Clear);
@@ -1190,17 +1195,19 @@ void Game::HandleObjectPicking(int selected)
             return;
         }
 
+        // Clear array if we had more than 1 element
         if (m_pickedObjects.size() > 1)
         {
             m_pickedObjects.clear();
         }
 
+        // Remove the currenty clicked element, this could also just index into array[0] but this is technically safer
         if (std::find(m_pickedObjects.begin(), m_pickedObjects.end(), selected) != m_pickedObjects.end())
         {
             std::shared_ptr<SelectionCommand> command = std::make_shared<SelectionCommand>(selected, SelectionType::Remove);
             ExecuteCommand(command);
         }
-        else
+        else // Set the array to be the clicked index
         {
             std::shared_ptr<SelectionCommand> command = std::make_shared<SelectionCommand>(selected, SelectionType::Set);
             ExecuteCommand(command);
@@ -1229,6 +1236,8 @@ void Game::UpdateTerrainDebugCircle()
     m_debugCircleVertices.clear();
 
     const int numSegments = 64;
+
+    // Shorter names, less typing
     const Vector3 center = m_currentTerrainHit;
     const float radius = m_terrainEditRadius;
     const float heightScale = m_displayChunk.m_terrainHeightScale;
@@ -1237,27 +1246,33 @@ void Game::UpdateTerrainDebugCircle()
 
     for (int i = 0; i <= numSegments; ++i)
     {
+        // Circle equation to find the world position of the vert where we will draw the circle
         float angle = static_cast<float>(i) / numSegments * 2.0f * XM_PI;
         float worldX = center.x + cos(angle) * radius;
         float worldZ = center.z + sin(angle) * radius;
 
+        // Translate the world position into terrain index
         float gridX_f = (worldX + (0.5f * terrainSize)) / posScale;
         float gridZ_f = (worldZ + (0.5f * terrainSize)) / posScale;
 
+        // Clamp index, to terrain array bounds
         gridX_f = std::max(0.f, std::min(gridX_f, static_cast<float>(TERRAINRESOLUTION - 1)));
         gridZ_f = std::max(0.f, std::min(gridZ_f, static_cast<float>(TERRAINRESOLUTION - 1)));
 
+        // Convert to integers and calculate proper index
         int gridX = static_cast<int>(std::round(gridX_f));
         int gridZ = static_cast<int>(std::round(gridZ_f));
         int index = gridZ * TERRAINRESOLUTION + gridX;
 
+        // If index is outside of bounds, just use 0, HACK
         if (index < 0 || index >= TERRAINRESOLUTION * TERRAINRESOLUTION)
         {
             index = 0;
         }
+        
+        // Offset vertex by height and height scale + a little offset up, to make sure it does not clip into terrain
         BYTE height = m_displayChunk.GetHeight(index);
         float worldY = static_cast<float>(height) * heightScale + 0.25f;
-
         m_debugCircleVertices.push_back(DirectX::VertexPositionColor(Vector3(worldX, worldY + 0.1f, worldZ), DirectX::Colors::Red));
     }
 }
@@ -1330,6 +1345,7 @@ void Game::DrawImGui()
 
 void Game::DrawHierarchy()
 {
+    // ImGui Debug drawing, very messy
     if (ImGui::CollapsingHeader("Debug Variables"))
     {
         ImGui::Indent();
@@ -1411,6 +1427,10 @@ void Game::DrawHierarchy()
 void Game::ToggleTerrainPainting()
 {
     m_editingTerrain = !m_editingTerrain;
+    if (m_editingTerrain)
+    {
+        m_editingSpline = false;
+    }
 }
 
 void Game::AddToTerrainBrushSize(float delta)
@@ -1440,8 +1460,10 @@ void Game::UpdateMinecartPosition()
 {
     const float deltaTime = (float)m_timer.GetElapsedSeconds();
 
+    // Interpolation along the splint points, if there are any
     if (m_Spline.GetLength() > 0.f) 
     {
+        // Are we going forwards or backwards?
         float acceleration = !m_goingBack ? m_minecartAcceleration : -m_minecartAcceleration;
         m_minecartSpeed += (acceleration * deltaTime);
         if (abs(m_minecartSpeed) > m_minecartMaxSpeed)
@@ -1449,8 +1471,10 @@ void Game::UpdateMinecartPosition()
             m_minecartSpeed = sign(m_minecartSpeed) * m_minecartMaxSpeed;
         }
 
+        // Increment time along spline
         m_splineTime += (m_minecartSpeed / m_Spline.GetLength()) * deltaTime;
 
+        // Update forward/backwards movement
         if (m_splineTime > 1.0f)
         {
             m_splineTime = 1.f;
@@ -1469,21 +1493,25 @@ void Game::UpdateMinecartPosition()
         m_splineTime = 0.f;
     }
 
+    // Get current position and tangent and offset up
     Vector3 currentPosition = m_Spline.GetLocationAtTime(m_splineTime);
     currentPosition.y += 1;
     Vector3 currentTangent = m_Spline.GetTangentAtTime(m_splineTime);
 
     Vector3 modelUp = Vector3::Up;
-
-    if (currentTangent.LengthSquared() < std::numeric_limits<float>::epsilon()) 
+    
+    // If the current tangent is kinda close to 0, make it Forward Vector
+    if (currentTangent.LengthSquared() < 0.0001f)
     {
         currentTangent = Vector3::Forward;
     }
     currentTangent.Normalize();
 
+    // Find right vector
     Vector3 forward = currentTangent;
     Vector3 right = modelUp.Cross(forward);
 
+    // Hack to make sure it is always correct
     if (right.LengthSquared() < 0.0001f) 
     {
         right = Vector3::Right.Cross(forward);
@@ -1506,6 +1534,10 @@ void Game::ToggleAnimateMinecart()
 void Game::ToggleEditingSpline()
 {
     m_editingSpline = !m_editingSpline;
+    if (m_editingSpline)
+    {
+        m_editingTerrain = false;
+    }
 }
 
 void Game::AddToSplineQuality(int delta)

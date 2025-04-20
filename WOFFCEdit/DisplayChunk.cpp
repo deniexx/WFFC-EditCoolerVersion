@@ -211,6 +211,7 @@ void DisplayChunk::ModifyTerrain(DirectX::SimpleMath::Vector3 worldHit, float ra
 		return;
 	}
 
+	// Compute circular, range for indexing into the array
 	float gridRadius = radius / m_terrainPositionScalingFactor;
 	gridRadius = std::max(gridRadius, 0.5f);
 
@@ -221,6 +222,7 @@ void DisplayChunk::ModifyTerrain(DirectX::SimpleMath::Vector3 worldHit, float ra
 
 	bool modified = false;
 
+	// Go through required indcised and add to the height 1/-1 depending on the direction
 	for (int y = minY; y <= maxY; ++y)
 	{
 		for (int x = minX; x <= maxX; ++x)

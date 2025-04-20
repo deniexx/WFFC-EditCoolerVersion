@@ -66,6 +66,7 @@ public:
 	void SaveDisplayChunk(ChunkObject* SceneChunk);	//saves geometry et al
 	void ClearDisplayList();
 
+	/** Setters and getters */
 	void SetPickedObjectsVector(std::vector<int> newPickedObjects);
 	void SetPickedObject(int id);
 	void AddPickedObject(int id);
@@ -73,9 +74,10 @@ public:
 	void SetTerrainHeightMap(const std::vector<BYTE>& newHeightMap);
 	void ToggleTerrainPainting();
 	void AddToTerrainBrushSize(float delta);
+
+	/** Spline functions */
 	void AddPointToSpline(Vector3 point);
 	void PopLastSplinePoint();
-
 	void UpdateMinecartPosition();
 	void ToggleAnimateMinecart();
 	void ToggleEditingSpline();
@@ -95,17 +97,19 @@ public:
 #endif
 
 private:
-
-	bool TraceAgainstTerrain(Vector3& outHit);
+	
 	void Update(DX::StepTimer const& timer);
-	void UpdateHotkeys();
 	void CreateDeviceDependentResources();
 	void CreateWindowSizeDependentResources();
 
-	int PickObjectUnderMouse();
-	void HandleObjectPicking(int selected);
+	void UpdateHotkeys();
+
+	bool TraceAgainstTerrain(Vector3& outHit);
 	void PickTerrainAndModify(bool modify);
 	void UpdateTerrainDebugCircle();
+
+	int PickObjectUnderMouse();
+	void HandleObjectPicking(int selected);
 
 	void DrawImGui();
 	void DrawHierarchy();
@@ -134,12 +138,12 @@ private:
 	std::unique_ptr<DirectX::Mouse>         m_mouse;
 	std::unique_ptr<Camera>					m_camera;
 
+	/** Object picking */
 	std::vector<int>						m_pickedObjects;
 	Vector3									m_lastMouse;
 	HWND									m_hwnd;
 	HCURSOR									m_cursor;
-
-	float m_transformDragStep = 1.f;
+	/** End object picking  */
 
 	// DirectXTK objects.
 	std::unique_ptr<DirectX::CommonStates>                                  m_states;
@@ -163,6 +167,7 @@ private:
 	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView>                        m_texture2;
 	Microsoft::WRL::ComPtr<ID3D11InputLayout>                               m_batchInputLayout;
 
+	/** Input */
 	bool m_lmbDownLastFrame = false;
 	bool m_rmbDownLastFrame = false;
 	bool m_syncScale = false;
@@ -173,6 +178,8 @@ private:
 	bool m_tDownLastFrame = false;
 	bool m_plusDownLastFrame = false;
 	bool m_minusDownLastFrame = false;
+	/** End Input */
+
 	bool m_dialogHovered = false;
 	bool m_editingTerrain = true;
 
@@ -204,6 +211,7 @@ private:
 	float m_minecartSpeed = 0.f;
 	float m_minecartAcceleration = 20.f;
 	bool m_goingBack = false;
+	/** End Splines */
 	
 #ifdef DXTK_AUDIO
     uint32_t                                                                m_audioEvent;
@@ -214,8 +222,6 @@ private:
 
     DirectX::SimpleMath::Matrix                                             m_world;
     DirectX::SimpleMath::Matrix                                             m_projection;
-
-
 };
 
 int sign(int value);

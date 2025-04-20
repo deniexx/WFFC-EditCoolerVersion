@@ -29,12 +29,14 @@ public:
 	ID3D11ShaderResourceView *					m_texture_diffuse;				//diffuse texture
 	Microsoft::WRL::ComPtr<ID3D11InputLayout>   m_terrainInputLayout;
 
+	/** Terrain modification */
 	VertArrayIndex GetVertexAtWorldPosition(DirectX::SimpleMath::Vector3 worldHit);
 	const DirectX::VertexPositionNormalTexture& GetVertex(int x, int y);
 	void ModifyTerrain(DirectX::SimpleMath::Vector3 worldHit, float radius, int direction);
 	BYTE GetHeight(int index);
 	void SetHeightMap(std::vector<BYTE> newHeightMap);
 	std::vector<BYTE> GetHeightMap();
+	/** End terrain modification */
 
 	float	m_terrainHeightScale;
 	int		m_terrainSize;				//size of terrain in metres
